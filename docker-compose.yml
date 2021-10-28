@@ -1,0 +1,49 @@
+version: '3.7'
+
+services:
+
+  mysql-real-order:
+    image: mysql:5.6
+    environment:
+      MYSQL_ROOT_PASSWORD: GCECjdRLf7RvwJLJ
+    volumes:
+      - ./docker/db/order:/docker-entrypoint-initdb.d
+      - real-order-data:/var/lib/mysql
+
+  mysql-real-voucher:
+    image: mysql:5.6
+    environment:
+      MYSQL_ROOT_PASSWORD: GCECjdRLf7RvwJLJ
+    volumes:
+      - ./docker/db/voucher:/docker-entrypoint-initdb.d
+      - real-voucher-data:/var/lib/mysql
+
+  phpmyadmin-real:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOSTS: mysql-real-order,mysql-real-voucher
+      PMA_PASSWORD: GCECjdRLf7RvwJLJ
+      PMA_USER: root
+    ports:
+      - "81:80"
+    depends_on:
+      - mysql-real-order
+      - mysql-real-voucher
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "15672:15672"
+    volumes:
+      - 'rabbitmq_data:/data'
+      - ./docker/rabbitmq.conf:/etc/rabbitmq/rabbitmq.config
+      - ./docker/rabbitmq_definitions.json:/opt/definitions.json
+
+volumes:
+  real-order-data:
+#    external:
+#      name: real-db-order
+  real-voucher-data:
+#    external:
+#      name: real-db-voucher
+  rabbitmq_data:

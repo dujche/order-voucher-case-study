@@ -1,0 +1,23 @@
+{
+  "users": [
+    {
+      "name": "admin",
+      "password": "tNS#@xY&.v6FYAcb",
+      "tags": "administrator"
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "/real/order"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "admin",
+      "vhost": "/real/order",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ]
+}
