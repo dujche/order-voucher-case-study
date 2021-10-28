@@ -2,13 +2,20 @@ version: '3.7'
 
 services:
 
-  php-order-app:
+  php-order-service:
     build:
       context: ./docker
     volumes:
       - ./order:/var/www/html
     ports:
       - 8000:80
+
+  php-voucher-service:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.voucher
+    volumes:
+      - ./voucher:/usr/src/voucher
 
   mysql-real-order:
     image: mysql:5.6

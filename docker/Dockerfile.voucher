@@ -1,0 +1,5 @@
+FROM php:7.4-cli
+
+WORKDIR /usr/src/voucher
+
+CMD [ "php", "./vendor/bin/laminas" ]
