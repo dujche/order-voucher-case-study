@@ -7,6 +7,8 @@ services:
       context: ./docker
     volumes:
       - ./order:/var/www/html
+    depends_on:
+      - rabbitmq
     ports:
       - 8000:80
 
@@ -16,6 +18,10 @@ services:
       dockerfile: Dockerfile.voucher
     volumes:
       - ./voucher:/usr/src/voucher
+    depends_on:
+      - rabbitmq
+    command: >
+      sh -c "sleep 15 && ./laminas voucher:listen"
 
   mysql-real-order:
     image: mysql:5.6
