@@ -2,6 +2,14 @@ version: '3.7'
 
 services:
 
+  php-order-app:
+    build:
+      context: ./docker
+    volumes:
+      - ./order:/var/www/html
+    ports:
+      - 8000:80
+
   mysql-real-order:
     image: mysql:5.6
     environment:
