@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App;
+namespace System;
+
+use Laminas\Log\LoggerInterface;
+use System\Log\Factory\LogFactory;
 
 /**
  * The configuration provider for the App module
@@ -30,8 +33,8 @@ class ConfigProvider
     public function getDependencies(): array
     {
         return [
-            'invokables' => [
-                Handler\PingHandler::class => Handler\PingHandler::class,
+            'factories' => [
+                LoggerInterface::class => LogFactory::class,
             ],
         ];
     }

@@ -1,5 +1,12 @@
 FROM php:7.4-apache
 
+RUN apt-get update && apt-get install -y \
+        libfreetype6-dev \
+        libjpeg62-turbo-dev \
+        libpng-dev \
+    && docker-php-ext-configure pdo_mysql \
+    && docker-php-ext-install -j$(nproc) pdo_mysql
+
 RUN a2enmod rewrite
 
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public

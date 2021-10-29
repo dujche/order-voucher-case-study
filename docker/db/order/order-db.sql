@@ -6,11 +6,13 @@ USE `order`;
 
 CREATE TABLE `orders`
 (
-    `id`        int(11)    NOT NULL AUTO_INCREMENT,
-    `amount`    int(11)    NOT NULL,
-    `currency`  char(3)    NOT NULL,
-    `published` tinyint(1) NOT NULL DEFAULT '0',
-    PRIMARY KEY (`id`)
+    `id`           int(11)  NOT NULL AUTO_INCREMENT,
+    `amount`       int(11)  NOT NULL,
+    `currency`     char(3)  NOT NULL,
+    `inserted_at`  datetime NOT NULL,
+    `published_at` datetime DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `publishedAt` (`published_at`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 

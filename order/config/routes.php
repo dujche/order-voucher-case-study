@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use Mezzio\Application;
 use Mezzio\MiddlewareFactory;
+use Order\Handler\OrderHandler;
+use Order\Middleware\SaveOrderToDatabaseMiddleware;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -38,5 +40,12 @@ use Psr\Container\ContainerInterface;
  */
 
 return static function (Application $app, MiddlewareFactory $factory, ContainerInterface $container): void {
-    $app->get('/', App\Handler\PingHandler::class, 'api.ping');
+    $app->post(
+        '/orders',
+        [
+            SaveOrderToDatabaseMiddleware::class,
+            OrderHandler::class
+        ],
+        'api.order'
+    );
 };
