@@ -6,6 +6,8 @@ use Mezzio\Application;
 use Mezzio\MiddlewareFactory;
 use Order\Handler\OrderHandler;
 use Order\Middleware\CreateOrderPayloadValidationMiddleware;
+use Order\Middleware\MarkOrderAsPublishedMiddleware;
+use Order\Middleware\PublishMessageToQueueMiddleware;
 use Order\Middleware\SaveOrderToDatabaseMiddleware;
 use Psr\Container\ContainerInterface;
 
@@ -46,6 +48,8 @@ return static function (Application $app, MiddlewareFactory $factory, ContainerI
         [
             CreateOrderPayloadValidationMiddleware::class,
             SaveOrderToDatabaseMiddleware::class,
+            PublishMessageToQueueMiddleware::class,
+            MarkOrderAsPublishedMiddleware::class,
             OrderHandler::class
         ],
         'api.order'

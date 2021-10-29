@@ -39,4 +39,15 @@ class OrderTable extends TableGateway
 
         return $this->insertWith($insert) === 1;
     }
+
+    public function setPublished(int $orderId, ?DateTime $publishedAt = null): bool
+    {
+        $update = $this->getSql()->update();
+        $update->set(['published_at' => ($publishedAt ?: new DateTime())->format('Y-m-d H:i:s')])
+            ->where->equalTo('id', $orderId);
+
+        $this->logger->debug($update->getSqlString($this->getAdapter()->getPlatform()));
+
+        return $this->updateWith($update) === 1;
+    }
 }

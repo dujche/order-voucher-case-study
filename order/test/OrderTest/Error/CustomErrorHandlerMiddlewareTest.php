@@ -9,12 +9,12 @@ use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Log\LoggerInterface;
 use Order\Error\CustomErrorHandlerMiddleware;
+use Order\Exception\InvalidArgumentException;
 use Order\Exception\RuntimeException;
 use Order\Exception\ValidationException;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Throwable;
 
 class CustomErrorHandlerMiddlewareTest extends TestCase
 {
@@ -29,6 +29,25 @@ class CustomErrorHandlerMiddlewareTest extends TestCase
         $loggerMock = $this->createMock(LoggerInterface::class);
         $loggerMock->expects($this->once())->method('err')
             ->with('Caught RuntimeException: foo');
+
+        $middleware = new CustomErrorHandlerMiddleware($loggerMock);
+        $response = $middleware->process($requestMock, $handlerMock);
+
+        $this->assertInstanceOf(EmptyResponse::class, $response);
+        $this->assertSame(500, $response->getStatusCode());
+    }
+
+    public function testInvalidArgumentException(): void
+    {
+        $requestMock = $this->createMock(ServerRequestInterface::class);
+
+        $handlerMock = $this->createMock(RequestHandlerInterface::class);
+        $handlerMock->expects($this->once())->method('handle')
+            ->with($requestMock)->willThrowException(new InvalidArgumentException('foo'));
+
+        $loggerMock = $this->createMock(LoggerInterface::class);
+        $loggerMock->expects($this->once())->method('err')
+            ->with('Caught InvalidArgumentException: foo');
 
         $middleware = new CustomErrorHandlerMiddleware($loggerMock);
         $response = $middleware->process($requestMock, $handlerMock);

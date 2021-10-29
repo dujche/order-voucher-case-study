@@ -7,6 +7,7 @@ namespace Order\Error;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Log\LoggerInterface;
+use Order\Exception\InvalidArgumentException;
 use Order\Exception\RuntimeException;
 use Order\Exception\ValidationException;
 use Psr\Http\Message\ResponseInterface;
@@ -32,6 +33,9 @@ class CustomErrorHandlerMiddleware implements MiddlewareInterface
             return new JsonResponse(['error' => $validationException->getMessage()], 400);
         } catch (RuntimeException $runtimeException) {
             $this->logger->err('Caught RuntimeException: ' . $runtimeException->getMessage());
+            return new EmptyResponse(500);
+        } catch (InvalidArgumentException $invalidArgumentException) {
+            $this->logger->err('Caught InvalidArgumentException: ' . $invalidArgumentException->getMessage());
             return new EmptyResponse(500);
         }
     }

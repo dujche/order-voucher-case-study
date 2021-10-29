@@ -17,7 +17,7 @@ use PHPUnit\Framework\TestCase;
 
 class OrderTableTest extends TestCase
 {
-    public function testAdd()
+    public function testAdd(): void
     {
         $expectedSQL = <<<TEXT
 INSERT INTO `orders` (`id`, `amount`, `currency`, `inserted_at`, `published_at`) VALUES (NULL, '10000', 'EUR', '2021-01-01 00:00:00', NULL)
@@ -49,7 +49,35 @@ TEXT;
 
     }
 
-    protected function getAdapterMock(Mysql $mockPlatformInterface, int $lastGeneratedValue = 50)
+    public function testSetPublished(): void
+    {
+        $expectedSQL = <<<TEXT
+UPDATE `orders` SET `published_at` = '2021-01-01 00:00:00' WHERE `id` = '10'
+TEXT;
+
+        $loggerMock = $this->createMock(LoggerInterface::class);
+        $loggerMock->expects($this->once())->method('debug')
+            ->with($expectedSQL);
+
+        $hydrator = new OrderEntityHydrator();
+
+        $table = $this->getMockBuilder(OrderTable::class)
+            ->setConstructorArgs(
+                [
+                    $this->getAdapterMock($this->getMockPlatformInterface()),
+                    $hydrator,
+                    $loggerMock
+                ]
+            )->onlyMethods(['updateWith'])->getMock();
+
+        $table->expects($this->once())->method('updateWith')
+            ->willReturn(1);
+
+        $this->assertTrue($table->setPublished(10, new DateTime('2021-01-01')));
+
+    }
+
+    protected function getAdapterMock(Mysql $mockPlatformInterface, int $lastGeneratedValue = 50): AdapterInterface
     {
         $connectionMock = $this->createMock(ConnectionInterface::class);
         $connectionMock->method('getLastGeneratedValue')->willReturn($lastGeneratedValue);
@@ -63,7 +91,7 @@ TEXT;
         return $adapterMock;
     }
 
-    protected function getMockPlatformInterface()
+    protected function getMockPlatformInterface(): Mysql
     {
         $mockPlatformInterface = $this->getMockBuilder(Mysql::class)
             ->disableOriginalConstructor()

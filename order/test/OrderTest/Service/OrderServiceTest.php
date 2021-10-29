@@ -35,4 +35,13 @@ class OrderServiceTest extends TestCase
         $this->assertTrue($service->add($orderEntity));
         $this->assertEquals(50, $orderEntity->getId());
     }
+
+    public function testSetPublished(): void
+    {
+        $tableMock = $this->createMock(OrderTable::class);
+        $tableMock->expects($this->once())->method('setPublished')->with(100)->willReturn(true);
+
+        $service = new OrderService($tableMock);
+        $this->assertTrue($service->setPublished(100));
+    }
 }

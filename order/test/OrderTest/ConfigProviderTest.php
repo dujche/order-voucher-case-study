@@ -11,7 +11,13 @@ use Order\Entity\OrderEntityHydrator;
 use Order\Error\CustomErrorHandlerMiddleware;
 use Order\Filter\CreateOrderPayloadFilter;
 use Order\Handler\OrderHandler;
+use Order\MessageQueue\Factory\OrderCreatedMessageProducerFactory;
+use Order\MessageQueue\Factory\RabbitMQConnectionFactory;
+use Order\MessageQueue\OrderCreatedMessageProducer;
+use Order\MessageQueue\RabbitMQConnection;
 use Order\Middleware\CreateOrderPayloadValidationMiddleware;
+use Order\Middleware\MarkOrderAsPublishedMiddleware;
+use Order\Middleware\PublishMessageToQueueMiddleware;
 use Order\Middleware\SaveOrderToDatabaseMiddleware;
 use Order\Service\OrderService;
 use Order\Table\OrderTable;
@@ -36,6 +42,10 @@ class ConfigProviderTest extends TestCase
                         SaveOrderToDatabaseMiddleware::class => ConfigAbstractFactory::class,
                         CreateOrderPayloadValidationMiddleware::class => ConfigAbstractFactory::class,
                         CustomErrorHandlerMiddleware::class => ConfigAbstractFactory::class,
+                        OrderCreatedMessageProducer::class => OrderCreatedMessageProducerFactory::class,
+                        RabbitMQConnection::class => RabbitMQConnectionFactory::class,
+                        PublishMessageToQueueMiddleware::class => ConfigAbstractFactory::class,
+                        MarkOrderAsPublishedMiddleware::class => ConfigAbstractFactory::class,
                     ],
                 ],
                 ConfigAbstractFactory::class => [
@@ -60,6 +70,14 @@ class ConfigProviderTest extends TestCase
                     ],
                     CustomErrorHandlerMiddleware::class => [
                         LoggerInterface::class
+                    ],
+                    PublishMessageToQueueMiddleware::class => [
+                        OrderCreatedMessageProducer::class,
+                        LoggerInterface::class,
+                    ],
+                    MarkOrderAsPublishedMiddleware::class => [
+                        OrderService::class,
+                        LoggerInterface::class,
                     ]
                 ]
             ],

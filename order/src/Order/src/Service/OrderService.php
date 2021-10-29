@@ -25,4 +25,9 @@ class OrderService
 
         return $result;
     }
+
+    public function setPublished(int $orderId): bool
+    {
+        return $this->orderTable->setPublished($orderId);
+    }
 }
