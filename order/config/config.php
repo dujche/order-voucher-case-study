@@ -14,6 +14,9 @@ $cacheConfig = [
 ];
 
 $aggregator = new ConfigAggregator([
+    \Laminas\InputFilter\ConfigProvider::class,
+    \Laminas\Filter\ConfigProvider::class,
+    \Laminas\Validator\ConfigProvider::class,
     \Laminas\Log\ConfigProvider::class,
     \Laminas\Hydrator\ConfigProvider::class,
     \Laminas\Db\ConfigProvider::class,

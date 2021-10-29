@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Mezzio\Application;
 use Mezzio\MiddlewareFactory;
 use Order\Handler\OrderHandler;
+use Order\Middleware\CreateOrderPayloadValidationMiddleware;
 use Order\Middleware\SaveOrderToDatabaseMiddleware;
 use Psr\Container\ContainerInterface;
 
@@ -43,6 +44,7 @@ return static function (Application $app, MiddlewareFactory $factory, ContainerI
     $app->post(
         '/orders',
         [
+            CreateOrderPayloadValidationMiddleware::class,
             SaveOrderToDatabaseMiddleware::class,
             OrderHandler::class
         ],

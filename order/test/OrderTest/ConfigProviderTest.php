@@ -8,7 +8,10 @@ use Laminas\Log\LoggerInterface;
 use Laminas\ServiceManager\AbstractFactory\ConfigAbstractFactory;
 use Order\ConfigProvider;
 use Order\Entity\OrderEntityHydrator;
+use Order\Error\CustomErrorHandlerMiddleware;
+use Order\Filter\CreateOrderPayloadFilter;
 use Order\Handler\OrderHandler;
+use Order\Middleware\CreateOrderPayloadValidationMiddleware;
 use Order\Middleware\SaveOrderToDatabaseMiddleware;
 use Order\Service\OrderService;
 use Order\Table\OrderTable;
@@ -24,13 +27,16 @@ class ConfigProviderTest extends TestCase
                 'dependencies' => [
                     'invokables' => [
                         OrderEntityHydrator::class,
+                        CreateOrderPayloadFilter::class,
                     ],
                     'factories' => [
                         OrderHandler::class => ConfigAbstractFactory::class,
                         OrderService::class => ConfigAbstractFactory::class,
                         OrderTable::class => ConfigAbstractFactory::class,
                         SaveOrderToDatabaseMiddleware::class => ConfigAbstractFactory::class,
-                    ]
+                        CreateOrderPayloadValidationMiddleware::class => ConfigAbstractFactory::class,
+                        CustomErrorHandlerMiddleware::class => ConfigAbstractFactory::class,
+                    ],
                 ],
                 ConfigAbstractFactory::class => [
                     OrderHandler::class => [
@@ -47,6 +53,13 @@ class ConfigProviderTest extends TestCase
                     SaveOrderToDatabaseMiddleware::class => [
                         OrderService::class,
                         LoggerInterface::class,
+                    ],
+                    CreateOrderPayloadValidationMiddleware::class => [
+                        CreateOrderPayloadFilter::class,
+                        LoggerInterface::class,
+                    ],
+                    CustomErrorHandlerMiddleware::class => [
+                        LoggerInterface::class
                     ]
                 ]
             ],
