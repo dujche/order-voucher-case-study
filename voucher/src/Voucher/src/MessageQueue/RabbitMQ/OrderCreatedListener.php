@@ -8,8 +8,8 @@ use Exception;
 use Laminas\Log\LoggerInterface;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
-use Voucher\MessageQueue\Interfaces\ConsumerInterface;
-use Voucher\MessageQueue\Interfaces\ListenerInterface;
+use Voucher\Interfaces\ConsumerInterface;
+use Voucher\Interfaces\ListenerInterface;
 
 class OrderCreatedListener implements ListenerInterface
 {

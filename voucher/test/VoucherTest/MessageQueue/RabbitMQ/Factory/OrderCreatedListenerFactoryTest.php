@@ -10,7 +10,7 @@ use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Voucher\MessageQueue\Interfaces\MessageHandlerInterface;
+use Voucher\Interfaces\MessageHandlerInterface;
 use Voucher\MessageQueue\RabbitMQ\Factory\OrderCreatedListenerFactory;
 use Voucher\MessageQueue\RabbitMQ\OrderCreatedMessageHandler;
 use Voucher\MessageQueue\RabbitMQ\RabbitMQConnection;

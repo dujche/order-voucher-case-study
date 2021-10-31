@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Voucher\Command\ListenCommand;
-use Voucher\MessageQueue\Interfaces\ListenerInterface;
+use Voucher\Interfaces\ListenerInterface;
 
 class ListenCommandTest extends TestCase
 {

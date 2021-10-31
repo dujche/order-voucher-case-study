@@ -7,13 +7,16 @@ namespace VoucherTest\MessageQueue\RabbitMQ;
 use Exception;
 use JsonException;
 use Laminas\Log\LoggerInterface;
+use Money\Money;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Message\AMQPMessage;
 use PHPUnit\Framework\TestCase;
-use Voucher\MessageQueue\Interfaces\CreateVoucherStrategyInterface;
-use Voucher\MessageQueue\Interfaces\MessageHandlerInterface;
-use Voucher\MessageQueue\Interfaces\MessageValidatorInterface;
+use Voucher\Interfaces\CreateVoucherStrategyInterface;
+use Voucher\Interfaces\MessageHandlerInterface;
+use Voucher\Interfaces\MessageParserInterface;
+use Voucher\Interfaces\MessageValidatorInterface;
 use Voucher\MessageQueue\RabbitMQ\OrderCreatedMessageHandler;
+use Voucher\Strategy\QueueMessageValueObject;
 
 class OrderCreatedMessageHandlerTest extends TestCase
 {
@@ -35,13 +38,24 @@ class OrderCreatedMessageHandlerTest extends TestCase
         $this->messageValidator = $this->createMock(MessageValidatorInterface::class);
         $this->createVoucherStrategy = $this->createMock(CreateVoucherStrategyInterface::class);
 
+        $messageValueObject = new QueueMessageValueObject(150, Money::EUR(10000));
+
+        $messageParserMock = $this->createMock(MessageParserInterface::class);
+        $messageParserMock->expects($this->once())->method('parseMessage')
+            ->willReturn($messageValueObject);
+
         $messageBody = ['id' => 150];
 
         $this->messageMock = $this->createMock(AMQPMessage::class);
-        $this->messageMock->expects($this->once())->method('getBody')
+        $this->messageMock->method('getBody')
             ->willReturn(json_encode($messageBody, JSON_THROW_ON_ERROR));
 
-        $this->messageHandler = new OrderCreatedMessageHandler($this->logger, $this->messageValidator, $this->createVoucherStrategy);
+        $this->messageHandler = new OrderCreatedMessageHandler(
+            $this->logger,
+            $this->messageValidator,
+            $this->createVoucherStrategy,
+            $messageParserMock
+        );
     }
 
     /**

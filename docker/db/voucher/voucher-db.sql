@@ -10,9 +10,11 @@ USE `voucher`;
 CREATE TABLE `vouchers`
 (
     `id`        int(11)    NOT NULL AUTO_INCREMENT,
-    `orderId`   int(11)    NOT NULL,
-    `processed` tinyint(1) NOT NULL DEFAULT '0',
+    `order_id`   int(11)    NOT NULL,
+    `amount`       int(11)  NOT NULL,
+    `currency`     char(3)  NOT NULL,
+    `inserted_at`  datetime NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `orderId` (`orderId`)
+    UNIQUE KEY `order_id` (`order_id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;

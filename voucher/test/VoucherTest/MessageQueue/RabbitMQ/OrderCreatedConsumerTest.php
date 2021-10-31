@@ -6,7 +6,7 @@ namespace VoucherTest\MessageQueue\RabbitMQ;
 
 use PhpAmqpLib\Channel\AMQPChannel;
 use PHPUnit\Framework\TestCase;
-use Voucher\MessageQueue\Interfaces\MessageHandlerInterface;
+use Voucher\Interfaces\MessageHandlerInterface;
 use Voucher\MessageQueue\RabbitMQ\OrderCreatedConsumer;
 
 class OrderCreatedConsumerTest extends TestCase

@@ -1,6 +1,6 @@
 <?php
 
-namespace Voucher\MessageQueue\Interfaces;
+namespace Voucher\Interfaces;
 
 interface ListenerInterface
 {

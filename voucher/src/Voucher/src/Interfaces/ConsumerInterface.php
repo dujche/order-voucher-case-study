@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Voucher\MessageQueue\Interfaces;
+namespace Voucher\Interfaces;
 
 interface ConsumerInterface
 {

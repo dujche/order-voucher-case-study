@@ -12,7 +12,7 @@ services:
     ports:
       - 8000:80
 
-  php-voucher-service:
+  php-voucher-event-listener:
     build:
       context: ./docker
       dockerfile: Dockerfile.voucher
@@ -20,6 +20,7 @@ services:
       - ./voucher:/usr/src/voucher
     depends_on:
       - rabbitmq
+    restart: on-failure
     command: >
       sh -c "sleep 15 && ./laminas voucher:listen"
 

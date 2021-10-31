@@ -6,8 +6,8 @@ namespace Voucher\MessageQueue\RabbitMQ;
 
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Message\AMQPMessage;
-use Voucher\MessageQueue\Interfaces\ConsumerInterface;
-use Voucher\MessageQueue\Interfaces\MessageHandlerInterface;
+use Voucher\Interfaces\ConsumerInterface;
+use Voucher\Interfaces\MessageHandlerInterface;
 
 class OrderCreatedConsumer implements ConsumerInterface
 {
