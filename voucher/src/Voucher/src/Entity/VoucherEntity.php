@@ -26,12 +26,9 @@ class VoucherEntity
         return $this->id;
     }
 
-    /**
-     * @param int|null $id
-     */
-    public function setId(?int $id): void
+    public function setId($id): void
     {
-        $this->id = $id;
+        $this->id = $id ? (int)$id : null;
     }
 
     /**
@@ -42,12 +39,9 @@ class VoucherEntity
         return $this->orderId;
     }
 
-    /**
-     * @param int $orderId
-     */
-    public function setOrderId(int $orderId): void
+    public function setOrderId($orderId): void
     {
-        $this->orderId = $orderId;
+        $this->orderId = (int) $orderId;
     }
 
     /**
@@ -58,12 +52,9 @@ class VoucherEntity
         return $this->amount;
     }
 
-    /**
-     * @param int $amount
-     */
-    public function setAmount(int $amount): void
+    public function setAmount($amount): void
     {
-        $this->amount = $amount;
+        $this->amount = (int) $amount;
     }
 
     /**
@@ -96,5 +87,16 @@ class VoucherEntity
     public function setInsertedAt(DateTime $insertedAt): void
     {
         $this->insertedAt = $insertedAt;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'orderId' => $this->orderId,
+            'amount' => $this->amount,
+            'currency' => $this->currency,
+            'insertedAt' => $this->insertedAt ? $this->insertedAt->format('Y-m-d H:i:s') : null,
+        ];
     }
 }

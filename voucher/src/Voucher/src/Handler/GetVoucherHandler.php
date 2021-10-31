@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Order\Handler;
+namespace Voucher\Handler;
 
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
-use Order\Service\OrderService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Voucher\Service\VoucherService;
 
-class GetOrderHandler implements RequestHandlerInterface
+class GetVoucherHandler implements RequestHandlerInterface
 {
-    private OrderService $orderService;
+    private VoucherService $voucherService;
 
-    public function __construct(OrderService $orderService)
+    public function __construct(VoucherService $voucherService)
     {
-        $this->orderService = $orderService;
+        $this->voucherService = $voucherService;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -26,11 +26,11 @@ class GetOrderHandler implements RequestHandlerInterface
 
         if ($single === null) {
             return new JsonResponse(
-                $this->orderService->getAll()
+                $this->voucherService->getAll()
             );
         }
 
-        $orderEntity = $this->orderService->getById((int) $single);
+        $orderEntity = $this->voucherService->getById((int) $single);
 
         return $orderEntity ? new JsonResponse($orderEntity->toArray()) : new EmptyResponse(404);
     }

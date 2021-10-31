@@ -9,6 +9,7 @@ use Laminas\Log\LoggerInterface;
 use Laminas\ServiceManager\AbstractFactory\ConfigAbstractFactory;
 use Voucher\Command\ListenCommand;
 use Voucher\Entity\VoucherEntityHydrator;
+use Voucher\Handler\GetVoucherHandler;
 use Voucher\MessageQueue\RabbitMQ\Factory\OrderCreatedListenerFactory;
 use Voucher\MessageQueue\RabbitMQ\Factory\RabbitMQConnectionFactory;
 use Voucher\MessageQueue\RabbitMQ\OrderCreatedListener;
@@ -71,6 +72,7 @@ class ConfigProvider
                 CreateFiveEuroVoucherStrategy::class => ConfigAbstractFactory::class,
                 CurrencyExchangeRateFetcher::class => ConfigAbstractFactory::class,
                 Client::class => HttpClientFactory::class,
+                GetVoucherHandler::class => ConfigAbstractFactory::class,
             ]
         ];
     }
@@ -107,6 +109,9 @@ class ConfigProvider
                 'config',
                 Client::class,
                 LoggerInterface::class,
+            ],
+            GetVoucherHandler::class => [
+                VoucherService::class
             ]
         ];
     }

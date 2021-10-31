@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Mezzio\Application;
 use Mezzio\MiddlewareFactory;
 use Psr\Container\ContainerInterface;
+use Voucher\Handler\GetVoucherHandler;
 
 /**
  * FastRoute route configuration
@@ -25,4 +26,19 @@ use Psr\Container\ContainerInterface;
  */
 
 return static function (Application $app, MiddlewareFactory $factory, ContainerInterface $container): void {
+    $app->get(
+        '/vouchers',
+        [
+            GetVoucherHandler::class
+        ],
+        'api.order.get'
+    );
+
+    $app->get(
+        '/voucher/{id:\d+}',
+        [
+            GetVoucherHandler::class
+        ],
+        'api.order.get.single'
+    );
 };

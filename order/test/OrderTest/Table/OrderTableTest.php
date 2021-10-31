@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OrderTest\Table;
 
 use DateTime;
-use Laminas\Log\LoggerInterface;
 use Order\Entity\OrderEntity;
 use Order\Entity\OrderEntityHydrator;
 use Order\Table\OrderTable;

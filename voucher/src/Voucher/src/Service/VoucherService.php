@@ -28,4 +28,25 @@ class VoucherService
     {
         return $this->voucherTable->getOneByOrderId($orderId);
     }
+
+    public function getAll(): array
+    {
+        $result = $this->voucherTable->getAll();
+        if ($result === null) {
+            return [];
+        }
+
+        $toReturn = [];
+        /** @var VoucherEntity $item */
+        foreach($result as $item) {
+            $toReturn[] = $item->toArray();
+        }
+
+        return $toReturn;
+    }
+
+    public function getById(int $orderId): ?VoucherEntity
+    {
+        return $this->voucherTable->getById($orderId);
+    }
 }

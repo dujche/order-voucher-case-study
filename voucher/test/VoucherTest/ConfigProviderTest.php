@@ -11,6 +11,7 @@ use PHPUnit\Framework\TestCase;
 use Voucher\Command\ListenCommand;
 use Voucher\ConfigProvider;
 use Voucher\Entity\VoucherEntityHydrator;
+use Voucher\Handler\GetVoucherHandler;
 use Voucher\MessageQueue\RabbitMQ\Factory\OrderCreatedListenerFactory;
 use Voucher\MessageQueue\RabbitMQ\Factory\RabbitMQConnectionFactory;
 use Voucher\MessageQueue\RabbitMQ\OrderCreatedListener;
@@ -52,6 +53,7 @@ class ConfigProviderTest extends TestCase
                         CreateFiveEuroVoucherStrategy::class => ConfigAbstractFactory::class,
                         CurrencyExchangeRateFetcher::class => ConfigAbstractFactory::class,
                         Client::class => HttpClientFactory::class,
+                        GetVoucherHandler::class => ConfigAbstractFactory::class,
                     ]
                 ],
                 ConfigAbstractFactory::class => [
@@ -84,6 +86,9 @@ class ConfigProviderTest extends TestCase
                         'config',
                         Client::class,
                         LoggerInterface::class,
+                    ],
+                    GetVoucherHandler::class => [
+                        VoucherService::class
                     ]
                 ]
             ],
