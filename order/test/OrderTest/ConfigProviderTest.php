@@ -10,7 +10,8 @@ use Order\ConfigProvider;
 use Order\Entity\OrderEntityHydrator;
 use Order\Error\CustomErrorHandlerMiddleware;
 use Order\Filter\CreateOrderPayloadFilter;
-use Order\Handler\OrderHandler;
+use Order\Handler\GetOrderHandler;
+use Order\Handler\PostOrderHandler;
 use Order\MessageQueue\Factory\OrderCreatedMessageProducerFactory;
 use Order\MessageQueue\Factory\RabbitMQConnectionFactory;
 use Order\MessageQueue\OrderCreatedMessageProducer;
@@ -36,7 +37,8 @@ class ConfigProviderTest extends TestCase
                         CreateOrderPayloadFilter::class,
                     ],
                     'factories' => [
-                        OrderHandler::class => ConfigAbstractFactory::class,
+                        PostOrderHandler::class => ConfigAbstractFactory::class,
+                        GetOrderHandler::class => ConfigAbstractFactory::class,
                         OrderService::class => ConfigAbstractFactory::class,
                         OrderTable::class => ConfigAbstractFactory::class,
                         SaveOrderToDatabaseMiddleware::class => ConfigAbstractFactory::class,
@@ -49,8 +51,11 @@ class ConfigProviderTest extends TestCase
                     ],
                 ],
                 ConfigAbstractFactory::class => [
-                    OrderHandler::class => [
+                    PostOrderHandler::class => [
                         LoggerInterface::class
+                    ],
+                    GetOrderHandler::class => [
+                        OrderService::class,
                     ],
                     OrderService::class => [
                         OrderTable::class

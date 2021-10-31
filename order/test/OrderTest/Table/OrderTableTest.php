@@ -5,10 +5,6 @@ declare(strict_types=1);
 namespace OrderTest\Table;
 
 use DateTime;
-use Laminas\Db\Adapter\AdapterInterface;
-use Laminas\Db\Adapter\Driver\ConnectionInterface;
-use Laminas\Db\Adapter\Driver\DriverInterface;
-use Laminas\Db\Adapter\Platform\Mysql;
 use Laminas\Log\LoggerInterface;
 use Order\Entity\OrderEntity;
 use Order\Entity\OrderEntityHydrator;
@@ -17,91 +13,91 @@ use PHPUnit\Framework\TestCase;
 
 class OrderTableTest extends TestCase
 {
+    use TableWithHydratorTestTrait;
+
+    public function getTableMock($adapterMock, $loggerMock): OrderTable
+    {
+        return $this->getMockBuilder(OrderTable::class)
+            ->setConstructorArgs(
+                [
+                    $adapterMock,
+                    new OrderEntityHydrator(),
+                    $loggerMock
+                ]
+            )
+            ->onlyMethods(['getSql'])->getMock();
+    }
+
     public function testAdd(): void
     {
-        $expectedSQL = <<<TEXT
-INSERT INTO `orders` (`id`, `amount`, `currency`, `inserted_at`, `published_at`) VALUES (NULL, '10000', 'EUR', '2021-01-01 00:00:00', NULL)
+        $expectedSql = <<<TEXT
+INSERT INTO `orders` (`id`, `amount`, `currency`, `inserted_at`, `published_at`) VALUES (NULL, 10000, EUR, 2021-01-01 00:00:00, NULL)
 TEXT;
-
-        $loggerMock = $this->createMock(LoggerInterface::class);
-        $loggerMock->expects($this->once())->method('debug')
-            ->with($expectedSQL);
-
-        $hydrator = new OrderEntityHydrator();
-
         $orderEntityMock = new OrderEntity();
         $orderEntityMock->setAmount(10000);
         $orderEntityMock->setCurrency('EUR');
 
-        $table = $this->getMockBuilder(OrderTable::class)
-            ->setConstructorArgs(
-                [
-                    $this->getAdapterMock($this->getMockPlatformInterface()),
-                    $hydrator,
-                    $loggerMock
-                ]
-            )->onlyMethods(['insertWith'])->getMock();
-
-        $table->expects($this->once())->method('insertWith')
-            ->willReturn(1);
+        /** @var OrderTable $table */
+        $table = $this->setUpTableMock(
+            $expectedSql,
+            $this->setupStatementMockWithAffectedRows(1)
+        );
 
         $this->assertTrue($table->add($orderEntityMock, new DateTime('2021-01-01')));
-
     }
 
     public function testSetPublished(): void
     {
         $expectedSQL = <<<TEXT
-UPDATE `orders` SET `published_at` = '2021-01-01 00:00:00' WHERE `id` = '10'
+UPDATE `orders` SET `published_at` = 2021-01-01 00:00:00 WHERE `id` = 10
 TEXT;
 
-        $loggerMock = $this->createMock(LoggerInterface::class);
-        $loggerMock->expects($this->once())->method('debug')
-            ->with($expectedSQL);
-
-        $hydrator = new OrderEntityHydrator();
-
-        $table = $this->getMockBuilder(OrderTable::class)
-            ->setConstructorArgs(
-                [
-                    $this->getAdapterMock($this->getMockPlatformInterface()),
-                    $hydrator,
-                    $loggerMock
-                ]
-            )->onlyMethods(['updateWith'])->getMock();
-
-        $table->expects($this->once())->method('updateWith')
-            ->willReturn(1);
+        /** @var OrderTable $table */
+        $table = $this->setUpTableMock(
+            $expectedSQL,
+            $this->setupStatementMockWithAffectedRows(1)
+        );
 
         $this->assertTrue($table->setPublished(10, new DateTime('2021-01-01')));
-
     }
 
-    protected function getAdapterMock(Mysql $mockPlatformInterface, int $lastGeneratedValue = 50): AdapterInterface
+    public function testGetByIdNoResults(): void
     {
-        $connectionMock = $this->createMock(ConnectionInterface::class);
-        $connectionMock->method('getLastGeneratedValue')->willReturn($lastGeneratedValue);
+        $expectedSql = 'SELECT `orders`.* FROM `orders` WHERE `id` = 10';
 
-        $driverMock = $this->createMock(DriverInterface::class);
-        $driverMock->method('getConnection')->willReturn($connectionMock);
+        /** @var OrderTable $table */
+        $table = $this->setUpTableMock($expectedSql, $this->setupStatementMockWithNoResults());
 
-        $adapterMock = $this->createMock(AdapterInterface::class);
-        $adapterMock->method('getDriver')->willReturn($driverMock);
-        $adapterMock->method('getPlatform')->willReturn($mockPlatformInterface);
-        return $adapterMock;
+        $this->assertNull($table->getById(10));
     }
 
-    protected function getMockPlatformInterface(): Mysql
+    public function testGetById(): void
     {
-        $mockPlatformInterface = $this->getMockBuilder(Mysql::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['quoteValue'])
-            ->getMock();
+        $expectedSql = 'SELECT `orders`.* FROM `orders` WHERE `id` = 10';
 
-        $mockPlatformInterface->method('quoteValue')->willReturnCallback(function ($param) {
-            return "'$param'";
-        });
+        /** @var OrderTable $table */
+        $table = $this->setUpTableMock($expectedSql, $this->setupStatementMockWithSingleResult(['id' => 20]));
 
-        return $mockPlatformInterface;
+        $this->assertInstanceOf(OrderEntity::class, $table->getById(10));
+    }
+
+    public function testGetAllNoResults(): void
+    {
+        $expectedSql = 'SELECT `orders`.* FROM `orders`';
+
+        /** @var OrderTable $table */
+        $table = $this->setUpTableMock($expectedSql, $this->setupStatementMockWithNoResults());
+
+        $this->assertNull($table->getAll());
+    }
+
+    public function testGetAll(): void
+    {
+        $expectedSql = 'SELECT `orders`.* FROM `orders`';
+
+        /** @var OrderTable $table */
+        $table = $this->setUpTableMock($expectedSql, $this->setupStatementMockWithResults());
+
+        $this->assertNotNull($table->getAll());
     }
 }

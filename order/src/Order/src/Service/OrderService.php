@@ -30,4 +30,25 @@ class OrderService
     {
         return $this->orderTable->setPublished($orderId);
     }
+
+    public function getAll(): array
+    {
+        $result = $this->orderTable->getAll();
+        if ($result === null) {
+            return [];
+        }
+
+        $toReturn = [];
+        /** @var OrderEntity $item */
+        foreach($result as $item) {
+            $toReturn[] = $item->toArray();
+        }
+
+        return $toReturn;
+    }
+
+    public function getById(int $orderId): ?OrderEntity
+    {
+        return $this->orderTable->getById($orderId);
+    }
 }

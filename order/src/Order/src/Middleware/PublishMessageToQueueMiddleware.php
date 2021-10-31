@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Order\Middleware;
 
+use Exception;
 use JsonException;
 use Laminas\Log\LoggerInterface;
 use Order\Entity\OrderEntity;
@@ -27,16 +28,16 @@ class PublishMessageToQueueMiddleware implements MiddlewareInterface
         $this->logger = $logger;
     }
 
-    /**
-     * @throws RuntimeException
-     * @throws JsonException
-     */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         /** @var OrderEntity|null $createdOrder */
         $createdOrder = $request->getAttribute(SaveOrderToDatabaseMiddleware::CREATED_ORDER);
 
-        $this->publishToQueue($createdOrder);
+        try {
+            $this->publishToQueue($createdOrder);
+        } catch (Exception $exception) {
+            $this->logger->err('Caught following exception while trying to publish to message queue: ' . $exception->getMessage());
+        }
 
         return $handler->handle($request);
     }
@@ -48,8 +49,7 @@ class PublishMessageToQueueMiddleware implements MiddlewareInterface
     private function publishToQueue(?OrderEntity $createdOrder): void
     {
         if ($createdOrder === null) {
-            $this->logger->err('Created order missing in the request object.');
-            throw new RuntimeException();
+            throw new RuntimeException('Created order missing in the request object.');
         }
 
         $this->logger->debug(sprintf('Call publish for order[%s]', $createdOrder->getId()));
@@ -59,7 +59,6 @@ class PublishMessageToQueueMiddleware implements MiddlewareInterface
                 'id' => $createdOrder->getId(),
                 'amount' => $createdOrder->getAmount(),
                 'currency' => $createdOrder->getCurrency(),
-                'redeliverCount' => 0
             ],
             JSON_THROW_ON_ERROR
         );

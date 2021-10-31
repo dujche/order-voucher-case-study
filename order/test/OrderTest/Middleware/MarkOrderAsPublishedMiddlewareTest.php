@@ -50,10 +50,11 @@ class MarkOrderAsPublishedMiddlewareTest extends TestCase
 
     public function testProcessWithoutCreatedOrderInRequest(): void
     {
-        $this->expectException(RuntimeException::class);
-
         $requestHandlerMock = $this->createMock(RequestHandlerInterface::class);
-        $requestHandlerMock->expects($this->never())->method('handle');
+        $requestHandlerMock->expects($this->once())->method('handle');
+
+        $this->logger->expects($this->once())->method('err')
+            ->with('Caught following exception while trying to set publishedAt: Created order missing in the request object.');
 
         $this->middleware->process(
             $this->createMock(ServerRequestInterface::class),
@@ -61,9 +62,6 @@ class MarkOrderAsPublishedMiddlewareTest extends TestCase
         );
     }
 
-    /**
-     * @throws RuntimeException
-     */
     public function testProcessWithoutSuccessInDatabase(): void
     {
         $requestMock = $this->createMock(ServerRequestInterface::class);

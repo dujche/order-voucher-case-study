@@ -13,7 +13,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;use function DeepCopy\deep_copy;
 
-class OrderHandler implements RequestHandlerInterface
+class PostOrderHandler implements RequestHandlerInterface
 {
     private LoggerInterface $logger;
 

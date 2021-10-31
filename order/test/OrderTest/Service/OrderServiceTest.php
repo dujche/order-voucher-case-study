@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OrderTest\Service;
 
+use DateTime;
+use Laminas\Db\ResultSet\HydratingResultSet;
 use Order\Entity\OrderEntity;
 use Order\Service\OrderService;
 use Order\Table\OrderTable;
@@ -43,5 +45,56 @@ class OrderServiceTest extends TestCase
 
         $service = new OrderService($tableMock);
         $this->assertTrue($service->setPublished(100));
+    }
+
+    public function testGetById(): void
+    {
+        $tableMock = $this->createMock(OrderTable::class);
+        $tableMock->expects($this->once())->method('getById')->with(10)->willReturn(null);
+
+        $service = new OrderService($tableMock);
+        $this->assertNull($service->getById(10));
+    }
+
+    public function testGetAllNoResults(): void
+    {
+        $tableMock = $this->createMock(OrderTable::class);
+        $tableMock->expects($this->once())->method('getAll')->with()->willReturn(null);
+
+        $service = new OrderService($tableMock);
+        $this->assertSame([], $service->getAll());
+    }
+
+    public function testGetAllWithResults(): void
+    {
+        $orderEntity = new OrderEntity();
+        $orderEntity->setId(10);
+        $orderEntity->setAmount(1000);
+        $orderEntity->setCurrency('EUR');
+        $orderEntity->setInsertedAt(new DateTime('2021-01-01'));
+
+        $resultSetMock = $this->createMock(HydratingResultSet::class);
+        $resultSetMock->expects($this->exactly(2))->method('valid')
+            ->willReturnOnConsecutiveCalls(true, false);
+
+        $resultSetMock->expects($this->once())->method('current')
+            ->willReturn($orderEntity);
+
+        $tableMock = $this->createMock(OrderTable::class);
+        $tableMock->expects($this->once())->method('getAll')->with()->willReturn($resultSetMock);
+
+        $service = new OrderService($tableMock);
+        $this->assertSame(
+            [
+                [
+                    'id' => 10,
+                    'amount' => 1000,
+                    'currency' => 'EUR',
+                    'insertedAt' => '2021-01-01 00:00:00',
+                    'publishedAt' => null
+                ]
+            ],
+            $service->getAll()
+        );
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Order\Middleware;
 
-use JsonException;
+use Exception;
 use Laminas\Log\LoggerInterface;
 use Order\Entity\OrderEntity;
 use Order\Exception\RuntimeException;
@@ -13,7 +13,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Throwable;
 
 class MarkOrderAsPublishedMiddleware implements MiddlewareInterface
 {
@@ -27,15 +26,16 @@ class MarkOrderAsPublishedMiddleware implements MiddlewareInterface
         $this->logger = $logger;
     }
 
-    /**
-     * @throws RuntimeException
-     */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         /** @var OrderEntity|null $createdOrder */
         $createdOrder = $request->getAttribute(SaveOrderToDatabaseMiddleware::CREATED_ORDER);
 
-        $this->markOrderAsPublished($createdOrder);
+        try {
+            $this->markOrderAsPublished($createdOrder);
+        } catch (Exception $exception) {
+            $this->logger->err('Caught following exception while trying to set publishedAt: ' . $exception->getMessage());
+        }
 
         return $handler->handle($request);
     }
@@ -47,17 +47,12 @@ class MarkOrderAsPublishedMiddleware implements MiddlewareInterface
     private function markOrderAsPublished(?OrderEntity $createdOrder): void
     {
         if ($createdOrder === null) {
-            $this->logger->err('Created order missing in the request object.');
-            throw new RuntimeException();
+            throw new RuntimeException('Created order missing in the request object.');
         }
 
-        try {
-            $updateResult = $this->orderService->setPublished($createdOrder->getId());
-            if ($updateResult === false) {
-                throw new RuntimeException('No records in the database were updated');
-            }
-        } catch(Throwable $exception) {
-            $this->logger->err('Caught following exception while trying to set publishedAt: ' . $exception->getMessage());
+        $updateResult = $this->orderService->setPublished($createdOrder->getId());
+        if ($updateResult === false) {
+            throw new RuntimeException('No records in the database were updated');
         }
     }
 }

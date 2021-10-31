@@ -8,6 +8,8 @@ use Laminas\Filter\StringTrim;
 use Laminas\InputFilter\InputFilter;
 use Laminas\Validator\Callback;
 use Laminas\Validator\StringLength;
+use Money\Currencies\ISOCurrencies;
+use Money\Currency;
 
 class CreateOrderPayloadFilter extends InputFilter
 {
@@ -42,6 +44,8 @@ class CreateOrderPayloadFilter extends InputFilter
 
     private function addCurrencyInput(): void
     {
+        $currencies = new ISOCurrencies();
+
         $this->add(
             [
                 'name' => 'currency',
@@ -51,7 +55,6 @@ class CreateOrderPayloadFilter extends InputFilter
                         'name' => StringTrim::class,
                         'options' => [],
                     ],
-
                 ],
                 'validators' => [
                     [
@@ -66,6 +69,17 @@ class CreateOrderPayloadFilter extends InputFilter
                             ]
                         ],
                     ],
+                    [
+                        'name' => Callback::class,
+                        'options' => [
+                            'callback' => function ($currency) use ($currencies) {
+                                return $currencies->contains(new Currency($currency));
+                            },
+                            'messages' => [
+                                Callback::INVALID_VALUE => 'Unknown currency code',
+                            ]
+                        ]
+                    ]
                 ],
             ]
         );

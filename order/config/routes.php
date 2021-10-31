@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 use Mezzio\Application;
 use Mezzio\MiddlewareFactory;
-use Order\Handler\OrderHandler;
+use Order\Handler\GetOrderHandler;
+use Order\Handler\PostOrderHandler;
 use Order\Middleware\CreateOrderPayloadValidationMiddleware;
 use Order\Middleware\MarkOrderAsPublishedMiddleware;
 use Order\Middleware\PublishMessageToQueueMiddleware;
@@ -43,6 +44,23 @@ use Psr\Container\ContainerInterface;
  */
 
 return static function (Application $app, MiddlewareFactory $factory, ContainerInterface $container): void {
+
+    $app->get(
+        '/orders',
+        [
+            GetOrderHandler::class
+        ],
+        'api.order.get'
+    );
+
+    $app->get(
+        '/order/{id:\d+}',
+        [
+            GetOrderHandler::class
+        ],
+        'api.order.get.single'
+    );
+
     $app->post(
         '/orders',
         [
@@ -50,8 +68,8 @@ return static function (Application $app, MiddlewareFactory $factory, ContainerI
             SaveOrderToDatabaseMiddleware::class,
             PublishMessageToQueueMiddleware::class,
             MarkOrderAsPublishedMiddleware::class,
-            OrderHandler::class
+            PostOrderHandler::class
         ],
-        'api.order'
+        'api.order.post'
     );
 };

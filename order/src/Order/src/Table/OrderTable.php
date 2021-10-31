@@ -6,6 +6,8 @@ namespace Order\Table;
 
 use DateTime;
 use Laminas\Db\Adapter\AdapterInterface;
+use Laminas\Db\Adapter\Driver\ResultInterface;
+use Laminas\Db\ResultSet\HydratingResultSet;
 use Laminas\Db\TableGateway\TableGateway;
 use Laminas\Hydrator\HydratorInterface;
 use Laminas\Log\LoggerInterface;
@@ -49,5 +51,42 @@ class OrderTable extends TableGateway
         $this->logger->debug($update->getSqlString($this->getAdapter()->getPlatform()));
 
         return $this->updateWith($update) === 1;
+    }
+
+    public function getAll(): ?HydratingResultSet
+    {
+        $select = $this->getSql()->select();
+        $stmt = $this->getSql()->prepareStatementForSqlObject($select);
+        if ($this->logger) {
+            $this->logger->debug($select->getSqlString($this->getAdapter()->getPlatform()));
+        }
+        $result = $stmt->execute();
+
+        if ($result instanceof ResultInterface && $result->isQueryResult() && $result->count() > 0) {
+            $resultSet = new HydratingResultSet($this->hydrator, new OrderEntity());
+
+            return $resultSet->initialize($result);
+        }
+
+        return null;
+    }
+
+    public function getById(int $orderId): ?OrderEntity
+    {
+        $select = $this->getSql()->select();
+        $select->where->equalTo('id', $orderId);
+
+        $stmt = $this->getSql()->prepareStatementForSqlObject($select);
+        if ($this->logger) {
+            $this->logger->debug($select->getSqlString($this->getAdapter()->getPlatform()));
+        }
+
+        $result = $stmt->execute();
+
+        if ($result instanceof ResultInterface && $result->isQueryResult() && $result->count() > 0) {
+            return $this->hydrator->hydrate($result->current(), new OrderEntity());
+        }
+
+        return null;
     }
 }

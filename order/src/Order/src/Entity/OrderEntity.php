@@ -26,12 +26,9 @@ class OrderEntity
         return $this->id;
     }
 
-    /**
-     * @param ?int $id
-     */
-    public function setId(?int $id): void
+    public function setId($id): void
     {
-        $this->id = $id;
+        $this->id = $id ? (int)$id : null;
     }
 
     /**
@@ -42,12 +39,9 @@ class OrderEntity
         return $this->amount;
     }
 
-    /**
-     * @param int $amount
-     */
-    public function setAmount(int $amount): void
+    public function setAmount($amount): void
     {
-        $this->amount = $amount;
+        $this->amount = (int) $amount;
     }
 
     /**
@@ -90,11 +84,14 @@ class OrderEntity
         return $this->publishedAt;
     }
 
-    /**
-     * @param DateTime|null $publishedAt
-     */
-    public function setPublishedAt(?DateTime $publishedAt): void
+    public function toArray(): array
     {
-        $this->publishedAt = $publishedAt;
+        return [
+            'id' => $this->id,
+            'amount' => $this->amount,
+            'currency' => $this->currency,
+            'insertedAt' => $this->insertedAt ? $this->insertedAt->format('Y-m-d H:i:s') : null,
+            'publishedAt' => $this->publishedAt ? $this->publishedAt->format('Y-m-d H:i:s') : null
+        ];
     }
 }

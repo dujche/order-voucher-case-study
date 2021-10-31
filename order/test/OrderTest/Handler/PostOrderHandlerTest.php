@@ -10,12 +10,12 @@ use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Log\LoggerInterface;
 use Order\Entity\OrderEntity;
 use Order\Exception\RuntimeException;
-use Order\Handler\OrderHandler;
+use Order\Handler\PostOrderHandler;
 use Order\Middleware\SaveOrderToDatabaseMiddleware;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 
-class OrderHandlerTest extends TestCase
+class PostOrderHandlerTest extends TestCase
 {
     public function testExceptionThrownOnRequestWithoutAttribute(): void
     {
@@ -24,7 +24,7 @@ class OrderHandlerTest extends TestCase
         $loggerMock = $this->createMock(LoggerInterface::class);
         $loggerMock->expects($this->once())->method('err');
 
-        $orderHandler = new OrderHandler($loggerMock);
+        $orderHandler = new PostOrderHandler($loggerMock);
         $orderHandler->handle(
             $this->createMock(ServerRequestInterface::class)
         );
@@ -49,7 +49,7 @@ class OrderHandlerTest extends TestCase
         $requestMock->expects($this->once())->method('getAttribute')
             ->with(SaveOrderToDatabaseMiddleware::CREATED_ORDER)->willReturn($mockOrderEntity);
 
-        $orderHandler = new OrderHandler($loggerMock);
+        $orderHandler = new PostOrderHandler($loggerMock);
 
         $response = $orderHandler->handle($requestMock);
 

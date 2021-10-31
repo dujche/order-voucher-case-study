@@ -42,15 +42,13 @@ class PublishMessageToQueueMiddlewareTest extends TestCase
         );
     }
 
-    /**
-     * @throws JsonException
-     */
     public function testProcessWithoutCreatedOrderInRequest(): void
     {
-        $this->expectException(RuntimeException::class);
+        $this->logger->expects($this->once())->method('err')
+            ->with('Caught following exception while trying to publish to message queue: Created order missing in the request object.');
 
         $requestHandlerMock = $this->createMock(RequestHandlerInterface::class);
-        $requestHandlerMock->expects($this->never())->method('handle');
+        $requestHandlerMock->expects($this->once())->method('handle');
 
         $this->middleware->process(
             $this->createMock(ServerRequestInterface::class),
@@ -58,9 +56,6 @@ class PublishMessageToQueueMiddlewareTest extends TestCase
         );
     }
 
-    /**
-     * @throws JsonException|RuntimeException
-     */
     public function testProcess(): void
     {
         $orderEntity = new OrderEntity();
@@ -80,7 +75,7 @@ class PublishMessageToQueueMiddlewareTest extends TestCase
         $this->producer->expects($this->once())->method('publish')
             ->with(
                 $this->callback(static function(AMQPMessage $message) {
-                    return $message->getBody() === '{"id":5,"amount":1030,"currency":"GBP","redeliverCount":0}';
+                    return $message->getBody() === '{"id":5,"amount":1030,"currency":"GBP"}';
                 }),
                 OrderCreatedMessageProducer::ORDER_CREATED_CHANNEL_NAME
             );

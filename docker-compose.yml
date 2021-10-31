@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
 
-  php-order-service:
+  php-order-api:
     build:
       context: ./docker
     volumes:
