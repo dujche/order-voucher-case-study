@@ -84,6 +84,14 @@ class OrderEntity
         return $this->publishedAt;
     }
 
+    /**
+     * @param DateTime|null $publishedAt
+     */
+    public function setPublishedAt(?DateTime $publishedAt): void
+    {
+        $this->publishedAt = $publishedAt;
+    }
+
     public function toArray(): array
     {
         return [
