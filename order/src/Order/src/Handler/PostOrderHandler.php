@@ -11,7 +11,9 @@ use Order\Exception\RuntimeException;
 use Order\Middleware\SaveOrderToDatabaseMiddleware;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;use function DeepCopy\deep_copy;
+use Psr\Http\Server\RequestHandlerInterface;
+
+use function DeepCopy\deep_copy;
 
 class PostOrderHandler implements RequestHandlerInterface
 {

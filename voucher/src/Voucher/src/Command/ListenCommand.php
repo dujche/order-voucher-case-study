@@ -19,7 +19,7 @@ class ListenCommand extends Command
         $this->listener = $listener;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output) : int
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $output->writeln('Starting MQ Listener');
         $this->listener->listen();

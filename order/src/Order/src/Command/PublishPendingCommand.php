@@ -50,8 +50,7 @@ class PublishPendingCommand extends Command
         }
 
         /** @var OrderEntity $pendingOrder */
-        foreach ($pendingOrders as $pendingOrder)
-        {
+        foreach ($pendingOrders as $pendingOrder) {
             $this->logger->debug(sprintf('Call publish for order[%s]', $pendingOrder->getId()));
 
             $messageBody = json_encode(

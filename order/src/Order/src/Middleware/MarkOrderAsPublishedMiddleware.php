@@ -36,7 +36,9 @@ class MarkOrderAsPublishedMiddleware implements MiddlewareInterface
         try {
             $this->markOrderAsPublished($createdOrder, $publishedToQueue);
         } catch (Exception $exception) {
-            $this->logger->err('Caught following exception while trying to set publishedAt: ' . $exception->getMessage());
+            $this->logger->err(
+                'Caught following exception while trying to set publishedAt: ' . $exception->getMessage()
+            );
         }
 
         return $handler->handle($request);

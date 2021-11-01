@@ -47,9 +47,20 @@ class OrderCreatedMessageHandler implements MessageHandlerInterface
         try {
             $createVoucherResult = $this->createVoucherStrategy->createVoucher($messageValueObject);
             if ($createVoucherResult !== null) {
-                $this->logger->debug(sprintf("Voucher with id %s was created for order with id %s", $createVoucherResult, $messageValueObject->getId()));
+                $this->logger->debug(
+                    sprintf(
+                        "Voucher with id %s was created for order with id %s",
+                        $createVoucherResult,
+                        $messageValueObject->getId()
+                    )
+                );
             } else {
-                $this->logger->debug(sprintf("No new voucher created for order with id %s", $messageValueObject->getId()));
+                $this->logger->debug(
+                    sprintf(
+                        "No new voucher created for order with id %s",
+                        $messageValueObject->getId()
+                    )
+                );
             }
 
             $message->getChannel()->basic_ack($message->getDeliveryTag());

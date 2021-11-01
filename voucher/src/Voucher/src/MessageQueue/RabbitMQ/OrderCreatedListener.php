@@ -26,8 +26,12 @@ class OrderCreatedListener implements ListenerInterface
      * @param LoggerInterface $logger
      * @param ConsumerInterface $consumer
      */
-    public function __construct(LoggerInterface $logger, ConsumerInterface $consumer, AMQPChannel $channel, AMQPStreamConnection $connection)
-    {
+    public function __construct(
+        LoggerInterface $logger,
+        ConsumerInterface $consumer,
+        AMQPChannel $channel,
+        AMQPStreamConnection $connection
+    ) {
         $this->logger = $logger;
         $this->consumer = $consumer;
         $this->channel = $channel;
@@ -73,5 +77,3 @@ class OrderCreatedListener implements ListenerInterface
         }
     }
 }
-
-

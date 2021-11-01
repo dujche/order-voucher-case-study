@@ -38,7 +38,7 @@ class VoucherService
 
         $toReturn = [];
         /** @var VoucherEntity $item */
-        foreach($result as $item) {
+        foreach ($result as $item) {
             $toReturn[] = $item->toArray();
         }
 

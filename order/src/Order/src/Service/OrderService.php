@@ -40,7 +40,7 @@ class OrderService
 
         $toReturn = [];
         /** @var OrderEntity $item */
-        foreach($result as $item) {
+        foreach ($result as $item) {
             $toReturn[] = $item;
         }
 
@@ -56,7 +56,7 @@ class OrderService
 
         $toReturn = [];
         /** @var OrderEntity $item */
-        foreach($result as $item) {
+        foreach ($result as $item) {
             $toReturn[] = $item;
         }
 

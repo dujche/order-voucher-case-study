@@ -32,7 +32,6 @@ class RabbitMQConnectionFactory implements FactoryInterface
 
             return new RabbitMQConnection($connection);
         } catch (Exception $exception) {
-
             $logMessage = sprintf(
                 '%s failed to build a connection. Reason: %s',
                 AMQPStreamConnection::class,

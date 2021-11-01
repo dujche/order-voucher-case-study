@@ -27,7 +27,7 @@ class CreateFiveEuroVoucherStrategy implements CreateVoucherStrategyInterface
         $existingVoucher = $this->voucherService->getOneByOrderId($messageValueObject->getId());
 
         if ($existingVoucher !== null) {
-            $this->logger->info("Found existing voucher with id: ". $existingVoucher->getId());
+            $this->logger->info("Found existing voucher with id: " . $existingVoucher->getId());
             return $existingVoucher->getId();
         }
 
@@ -35,7 +35,10 @@ class CreateFiveEuroVoucherStrategy implements CreateVoucherStrategyInterface
             $currencies = new ISOCurrencies();
             $moneyFormatter = new DecimalMoneyFormatter($currencies);
             $this->logger->info(
-                "Value of the order (" . $moneyFormatter->format($messageValueObject->getMoney()) . " EUR) is less than 100 EUR. Not creating voucher."
+                sprintf(
+                    "Value of the order (%s EUR) is less than 100 EUR. Not creating voucher.",
+                    $moneyFormatter->format($messageValueObject->getMoney())
+                )
             );
             return null;
         }

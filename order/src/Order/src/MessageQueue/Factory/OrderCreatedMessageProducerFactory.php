@@ -12,8 +12,11 @@ use Order\MessageQueue\RabbitMQConnection;
 
 class OrderCreatedMessageProducerFactory implements FactoryInterface
 {
-    public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null): OrderCreatedMessageProducer
-    {
+    public function __invoke(
+        ContainerInterface $container,
+        $requestedName,
+        ?array $options = null
+    ): OrderCreatedMessageProducer {
         /** @var RabbitMQConnection|null $rabbitMQConnection */
         $rabbitMQConnection = $container->get(RabbitMQConnection::class);
         $connection = $rabbitMQConnection ? $rabbitMQConnection->getConnection() : null;

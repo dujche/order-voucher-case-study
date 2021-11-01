@@ -37,7 +37,9 @@ class PublishMessageToQueueMiddleware implements MiddlewareInterface
             $this->publishToQueue($createdOrder);
             $request = $request->withAttribute(static::class, true);
         } catch (Exception $exception) {
-            $this->logger->err('Caught following exception while trying to publish to message queue: ' . $exception->getMessage());
+            $this->logger->err(
+                'Caught following exception while trying to publish to message queue: ' . $exception->getMessage()
+            );
         }
 
         return $handler->handle($request);

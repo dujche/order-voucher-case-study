@@ -88,5 +88,4 @@ class OrderCreatedMessageProducer
             throw $e;
         }
     }
-
 }
