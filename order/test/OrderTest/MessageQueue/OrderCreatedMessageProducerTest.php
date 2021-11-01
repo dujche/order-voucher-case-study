@@ -7,6 +7,7 @@ namespace OrderTest\MessageQueue;
 use Exception;
 use JsonException;
 use Laminas\Log\LoggerInterface;
+use Order\Exception\RuntimeException;
 use Order\MessageQueue\OrderCreatedMessageProducer;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
@@ -50,7 +51,6 @@ class OrderCreatedMessageProducerTest extends TestCase
                     'id' => 123,
                     'amount' => 10000,
                     'currency' => 'EUR',
-                    'redeliverCount' => 0,
                 ],
                 JSON_THROW_ON_ERROR
             )
@@ -68,8 +68,31 @@ class OrderCreatedMessageProducerTest extends TestCase
         $this->assertInstanceOf(OrderCreatedMessageProducer::class, $this->producer);
     }
 
+    public function testPublishWithUnavailableChannel(): void
+    {
+        $this->expectException(RuntimeException::class);
+
+        $producer = new OrderCreatedMessageProducer(
+            $this->logger,
+            $this->connection,
+            null
+        );
+
+        $routingKey = 'some_route_key';
+
+        $this->logger->expects($this->once())
+            ->method('err')
+            ->with(
+                '[Order\MessageQueue\OrderCreatedMessageProducer::publish()] - Exception Order\Exception\RuntimeException[Rabbit MQ channel is not available] while publishing message [\'{"id":123,"amount":10000,"currency":"EUR"}\']'
+            );
+
+        $producer->publish($this->message, $routingKey);
+    }
+
     public function testPublishExceptionQueueing(): void
     {
+        $this->expectException(Exception::class);
+
         $routingKey = 'some_route_key';
 
         $this->channel->expects($this->once())
@@ -84,7 +107,7 @@ class OrderCreatedMessageProducerTest extends TestCase
         $this->logger->expects($this->once())
             ->method('err')
             ->with(
-                '[Order\MessageQueue\OrderCreatedMessageProducer::publish()] - Exception Exception[Foo-Exception] while publishing message [\'{"id":123,"amount":10000,"currency":"EUR","redeliverCount":0}\']'
+                '[Order\MessageQueue\OrderCreatedMessageProducer::publish()] - Exception Exception[Foo-Exception] while publishing message [\'{"id":123,"amount":10000,"currency":"EUR"}\']'
             );
 
         $this->producer->publish($this->message, $routingKey);
@@ -152,7 +175,7 @@ class OrderCreatedMessageProducerTest extends TestCase
             ->method('debug')
             ->with(
                 $this->identicalTo(
-                    'Queued message with key [some_route_key] and content [\'{"id":123,"amount":10000,"currency":"EUR","redeliverCount":0}\']'
+                    'Queued message with key [some_route_key] and content [\'{"id":123,"amount":10000,"currency":"EUR"}\']'
                 )
             );
 

@@ -6,6 +6,7 @@ namespace Order\MessageQueue;
 
 use Exception;
 use Laminas\Log\LoggerInterface;
+use Order\Exception\RuntimeException;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -17,14 +18,14 @@ class OrderCreatedMessageProducer
 
     private LoggerInterface $logger;
 
-    private AMQPStreamConnection $connection;
+    private ?AMQPStreamConnection $connection;
 
-    private AMQPChannel $channel;
+    private ?AMQPChannel $channel;
 
     public function __construct(
         LoggerInterface $logger,
-        AMQPStreamConnection $connection,
-        AMQPChannel $channel
+        ?AMQPStreamConnection $connection,
+        ?AMQPChannel $channel
     ) {
         $this->logger = $logger;
         $this->connection = $connection;
@@ -34,10 +35,14 @@ class OrderCreatedMessageProducer
     /**
      * @param AMQPMessage $message
      * @param string $routingKey
+     * @throws RuntimeException
      */
     public function publish(AMQPMessage $message, string $routingKey): void
     {
         try {
+            if ($this->channel === null) {
+                throw new RuntimeException('Rabbit MQ channel is not available');
+            }
             $this->channel->basic_publish($message, '', $routingKey);
             $this->logger->debug(
                 sprintf('Queued message with key [%s] and content [%s]', $routingKey, var_export($message->body, true))
@@ -52,6 +57,8 @@ class OrderCreatedMessageProducer
             );
 
             $this->logger->err($logMessage);
+
+            throw $e;
         }
     }
 
@@ -63,7 +70,9 @@ class OrderCreatedMessageProducer
         $this->logger->debug('closing channel...');
 
         try {
-            $this->channel->close();
+            if ($this->channel !== null) {
+                $this->channel->close();
+            }
         } catch (Exception $e) {
             $this->logger->err(sprintf('[%s()] - Unable to close channel', __METHOD__));
             throw $e;
@@ -71,7 +80,9 @@ class OrderCreatedMessageProducer
 
         $this->logger->debug('closing connection...');
         try {
-            $this->connection->close();
+            if ($this->connection !== null) {
+                $this->connection->close();
+            }
         } catch (Exception $e) {
             $this->logger->err(sprintf('[%s()] - Unable to close connection', __METHOD__));
             throw $e;

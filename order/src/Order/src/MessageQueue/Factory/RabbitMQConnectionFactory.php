@@ -6,6 +6,7 @@ namespace Order\MessageQueue\Factory;
 
 use Exception;
 use Interop\Container\ContainerInterface;
+use Laminas\Log\LoggerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Order\Exception\InvalidArgumentException;
 use Order\Exception\RuntimeException;
@@ -17,17 +18,31 @@ class RabbitMQConnectionFactory implements FactoryInterface
     /**
      * @throws RuntimeException|InvalidArgumentException
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): RabbitMQConnection
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): ?RabbitMQConnection
     {
-        $connection = $this->createConnection($this->getRabbitMqConfiguration($container));
+        $logger = $container->get(LoggerInterface::class);
 
-        if (!$connection) {
-            throw new RuntimeException(
-                sprintf('%s failed to build a connection.', AMQPStreamConnection::class)
+        try {
+            $connection = $this->createConnection($this->getRabbitMqConfiguration($container));
+            if (!$connection) {
+                throw new RuntimeException(
+                    sprintf('%s failed to build a connection.', AMQPStreamConnection::class)
+                );
+            }
+
+            return new RabbitMQConnection($connection);
+        } catch (Exception $exception) {
+
+            $logMessage = sprintf(
+                '%s failed to build a connection. Reason: %s',
+                AMQPStreamConnection::class,
+                $exception->getMessage()
             );
-        }
 
-        return new RabbitMQConnection($connection);
+            $logger->err($logMessage);
+
+            return null;
+        }
     }
 
     /**

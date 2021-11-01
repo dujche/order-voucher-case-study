@@ -6,6 +6,7 @@ namespace Order\Handler;
 
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
+use Order\Entity\OrderEntity;
 use Order\Service\OrderService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -26,7 +27,12 @@ class GetOrderHandler implements RequestHandlerInterface
 
         if ($single === null) {
             return new JsonResponse(
-                $this->orderService->getAll()
+                array_map(
+                    static function (OrderEntity $orderEntity) {
+                        return $orderEntity->toArray();
+                    },
+                    $this->orderService->getAll()
+                )
             );
         }
 

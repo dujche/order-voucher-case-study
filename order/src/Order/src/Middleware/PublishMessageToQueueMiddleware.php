@@ -35,6 +35,7 @@ class PublishMessageToQueueMiddleware implements MiddlewareInterface
 
         try {
             $this->publishToQueue($createdOrder);
+            $request = $request->withAttribute(static::class, true);
         } catch (Exception $exception) {
             $this->logger->err('Caught following exception while trying to publish to message queue: ' . $exception->getMessage());
         }
@@ -45,6 +46,7 @@ class PublishMessageToQueueMiddleware implements MiddlewareInterface
     /**
      * @param OrderEntity|null $createdOrder
      * @throws JsonException|RuntimeException
+     * @throws Exception
      */
     private function publishToQueue(?OrderEntity $createdOrder): void
     {
@@ -71,5 +73,7 @@ class PublishMessageToQueueMiddleware implements MiddlewareInterface
         );
 
         $this->producer->publish($message, OrderCreatedMessageProducer::ORDER_CREATED_CHANNEL_NAME);
+
+        $this->producer->closeConnection();
     }
 }

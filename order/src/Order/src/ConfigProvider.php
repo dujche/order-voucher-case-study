@@ -6,6 +6,7 @@ namespace Order;
 
 use Laminas\Log\LoggerInterface;
 use Laminas\ServiceManager\AbstractFactory\ConfigAbstractFactory;
+use Order\Command\PublishPendingCommand;
 use Order\Entity\OrderEntityHydrator;
 use Order\Error\CustomErrorHandlerMiddleware;
 use Order\Filter\CreateOrderPayloadFilter;
@@ -38,8 +39,18 @@ class ConfigProvider
     public function __invoke(): array
     {
         return [
+            'laminas-cli' => $this->getCliConfig(),
             'dependencies' => $this->getDependencies(),
             ConfigAbstractFactory::class => $this->getConfigAbstractFactories(),
+        ];
+    }
+
+    public function getCliConfig(): array
+    {
+        return [
+            'commands' => [
+                'order:publish:pending' => PublishPendingCommand::class,
+            ],
         ];
     }
 
@@ -65,6 +76,7 @@ class ConfigProvider
                 RabbitMQConnection::class => RabbitMQConnectionFactory::class,
                 PublishMessageToQueueMiddleware::class => ConfigAbstractFactory::class,
                 MarkOrderAsPublishedMiddleware::class => ConfigAbstractFactory::class,
+                PublishPendingCommand::class => ConfigAbstractFactory::class,
             ],
         ];
     }
@@ -103,6 +115,11 @@ class ConfigProvider
             ],
             MarkOrderAsPublishedMiddleware::class => [
                 OrderService::class,
+                LoggerInterface::class,
+            ],
+            PublishPendingCommand::class => [
+                OrderService::class,
+                OrderCreatedMessageProducer::class,
                 LoggerInterface::class,
             ]
         ];

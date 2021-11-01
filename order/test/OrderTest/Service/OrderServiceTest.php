@@ -86,15 +86,45 @@ class OrderServiceTest extends TestCase
         $service = new OrderService($tableMock);
         $this->assertSame(
             [
-                [
-                    'id' => 10,
-                    'amount' => 1000,
-                    'currency' => 'EUR',
-                    'insertedAt' => '2021-01-01 00:00:00',
-                    'publishedAt' => null
-                ]
+                $orderEntity
             ],
             $service->getAll()
+        );
+    }
+
+    public function testGetAllUnpublishedNoResults(): void
+    {
+        $tableMock = $this->createMock(OrderTable::class);
+        $tableMock->expects($this->once())->method('getAllUnpublished')->with()->willReturn(null);
+
+        $service = new OrderService($tableMock);
+        $this->assertSame([], $service->getAllUnpublished());
+    }
+
+    public function testGetAllUnpublishedWithResults(): void
+    {
+        $orderEntity = new OrderEntity();
+        $orderEntity->setId(10);
+        $orderEntity->setAmount(1000);
+        $orderEntity->setCurrency('EUR');
+        $orderEntity->setInsertedAt(new DateTime('2021-01-01'));
+
+        $resultSetMock = $this->createMock(HydratingResultSet::class);
+        $resultSetMock->expects($this->exactly(2))->method('valid')
+            ->willReturnOnConsecutiveCalls(true, false);
+
+        $resultSetMock->expects($this->once())->method('current')
+            ->willReturn($orderEntity);
+
+        $tableMock = $this->createMock(OrderTable::class);
+        $tableMock->expects($this->once())->method('getAllUnpublished')->with()->willReturn($resultSetMock);
+
+        $service = new OrderService($tableMock);
+        $this->assertSame(
+            [
+                $orderEntity
+            ],
+            $service->getAllUnpublished()
         );
     }
 }

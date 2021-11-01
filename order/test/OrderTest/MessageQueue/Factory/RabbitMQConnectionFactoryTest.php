@@ -6,13 +6,13 @@ namespace OrderTest\MessageQueue\Factory;
 
 use Exception;
 use Interop\Container\ContainerInterface;
+use Laminas\Log\LoggerInterface;
 use Order\Exception\InvalidArgumentException;
 use Order\Exception\RuntimeException;
 use Order\MessageQueue\Factory\RabbitMQConnectionFactory;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 
 
 class RabbitMQConnectionFactoryTest extends TestCase
@@ -32,6 +32,7 @@ class RabbitMQConnectionFactoryTest extends TestCase
     {
         $this->config = $this->setUpHostConfig();
         $this->container = $this->setUpContainer();
+        $this->logger = $this->createMock(LoggerInterface::class);
 
         $this->factory = new RabbitMQConnectionFactory();
     }
@@ -77,16 +78,16 @@ class RabbitMQConnectionFactoryTest extends TestCase
 
     /**
      * @dataProvider providerMissConfigurationTests
-     * @throws RuntimeException
      */
     public function testInvokeRabbitMQConfigIsMissing(array $config): void
     {
-        $this->container->expects($this->once())->method('get')->with('config')->willReturn($config);
+        $this->container->expects($this->exactly(2))
+            ->method('get')->withConsecutive(
+                [ LoggerInterface::class ],
+                [ 'config' ]
+            )->willReturnOnConsecutiveCalls($this->logger, $config);
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid RabbitMQ configuration.');
-
-        $this->factory->__invoke($this->container, '');
+        $this->assertNull($this->factory->__invoke($this->container, ''));
     }
 
 
@@ -96,27 +97,30 @@ class RabbitMQConnectionFactoryTest extends TestCase
      */
     public function testInvokeFailToBuildConnectionDueToIncorrectCredentials(): void
     {
-        $this->expectException(Exception::class);
+        $this->container->expects($this->exactly(2))
+            ->method('get')->withConsecutive(
+                [ LoggerInterface::class ],
+                [ 'config' ]
+            )->willReturnOnConsecutiveCalls($this->logger, $this->config);
 
-        $this->container->expects($this->once())
-            ->method('get')->with('config')->willReturn($this->config);
-
-        $this->factory->__invoke($this->container, '');
+        $this->assertNull($this->factory->__invoke($this->container, ''));
     }
 
     /**
      * @throws InvalidArgumentException
+     * @throws RuntimeException
      */
     public function testInvokeFailToBuildConnection(): void
     {
-        $this->expectException(RuntimeException::class);
-
-        $this->container->expects($this->once())
-            ->method('get')->with('config')->willReturn($this->config);
+        $this->container->expects($this->exactly(2))
+            ->method('get')->withConsecutive(
+                [ LoggerInterface::class ],
+                [ 'config' ]
+            )->willReturnOnConsecutiveCalls($this->logger, $this->config);
 
         $factory = $this->getMockBuilder(RabbitMQConnectionFactory::class)->onlyMethods(['createConnection'])->getMock();
         $factory->expects($this->once())->method('createConnection')->willReturn(null);
-        $factory->__invoke($this->container, '');
+        $this->assertNull($factory->__invoke($this->container, ''));
     }
 
     /**
@@ -125,8 +129,11 @@ class RabbitMQConnectionFactoryTest extends TestCase
      */
     public function testInvokeSucceeds(): void
     {
-        $this->container->expects($this->once())
-            ->method('get')->with('config')->willReturn($this->config);
+        $this->container->expects($this->exactly(2))
+            ->method('get')->withConsecutive(
+                [ LoggerInterface::class ],
+                [ 'config' ]
+            )->willReturnOnConsecutiveCalls($this->logger, $this->config);
 
         $factory = $this->getMockBuilder(RabbitMQConnectionFactory::class)->onlyMethods(['createConnection'])->getMock();
         $factory->expects($this->once())->method('createConnection')->willReturn($this->createMock(AMQPStreamConnection::class));

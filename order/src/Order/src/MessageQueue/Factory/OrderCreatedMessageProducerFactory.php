@@ -14,10 +14,12 @@ class OrderCreatedMessageProducerFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null): OrderCreatedMessageProducer
     {
-        /** @var RabbitMQConnection $rabbitMQConnection */
+        /** @var RabbitMQConnection|null $rabbitMQConnection */
         $rabbitMQConnection = $container->get(RabbitMQConnection::class);
-        $connection = $rabbitMQConnection->getConnection();
-        $channel = $rabbitMQConnection->buildChannel(OrderCreatedMessageProducer::ORDER_CREATED_CHANNEL_NAME);
+        $connection = $rabbitMQConnection ? $rabbitMQConnection->getConnection() : null;
+        $channel = $rabbitMQConnection ?
+            $rabbitMQConnection->buildChannel(OrderCreatedMessageProducer::ORDER_CREATED_CHANNEL_NAME)
+            : null;
 
         return new OrderCreatedMessageProducer(
             $container->get(LoggerInterface::class),

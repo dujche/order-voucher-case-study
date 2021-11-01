@@ -99,4 +99,24 @@ TEXT;
 
         $this->assertNotNull($table->getAll());
     }
+
+    public function testGetAllUnpublishedNoResults(): void
+    {
+        $expectedSql = 'SELECT `orders`.* FROM `orders` WHERE `published_at` IS NULL';
+
+        /** @var OrderTable $table */
+        $table = $this->setUpTableMock($expectedSql, $this->setupStatementMockWithNoResults());
+
+        $this->assertNull($table->getAllUnpublished());
+    }
+
+    public function testGetAllUnpublished(): void
+    {
+        $expectedSql = 'SELECT `orders`.* FROM `orders` WHERE `published_at` IS NULL';
+
+        /** @var OrderTable $table */
+        $table = $this->setUpTableMock($expectedSql, $this->setupStatementMockWithResults());
+
+        $this->assertNotNull($table->getAllUnpublished());
+    }
 }

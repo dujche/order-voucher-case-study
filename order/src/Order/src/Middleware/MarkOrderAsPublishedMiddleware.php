@@ -31,8 +31,10 @@ class MarkOrderAsPublishedMiddleware implements MiddlewareInterface
         /** @var OrderEntity|null $createdOrder */
         $createdOrder = $request->getAttribute(SaveOrderToDatabaseMiddleware::CREATED_ORDER);
 
+        $publishedToQueue = $request->getAttribute(PublishMessageToQueueMiddleware::class, false);
+
         try {
-            $this->markOrderAsPublished($createdOrder);
+            $this->markOrderAsPublished($createdOrder, $publishedToQueue);
         } catch (Exception $exception) {
             $this->logger->err('Caught following exception while trying to set publishedAt: ' . $exception->getMessage());
         }
@@ -44,10 +46,14 @@ class MarkOrderAsPublishedMiddleware implements MiddlewareInterface
      * @param OrderEntity|null $createdOrder
      * @throws RuntimeException
      */
-    private function markOrderAsPublished(?OrderEntity $createdOrder): void
+    private function markOrderAsPublished(?OrderEntity $createdOrder, bool $publishedToQueue): void
     {
         if ($createdOrder === null) {
             throw new RuntimeException('Created order missing in the request object.');
+        }
+
+        if ($publishedToQueue === false) {
+            throw new RuntimeException('Publish to queue was not successful. Aborting DB update.');
         }
 
         $updateResult = $this->orderService->setPublished($createdOrder->getId());

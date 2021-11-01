@@ -6,6 +6,7 @@ namespace OrderTest;
 
 use Laminas\Log\LoggerInterface;
 use Laminas\ServiceManager\AbstractFactory\ConfigAbstractFactory;
+use Order\Command\PublishPendingCommand;
 use Order\ConfigProvider;
 use Order\Entity\OrderEntityHydrator;
 use Order\Error\CustomErrorHandlerMiddleware;
@@ -31,6 +32,11 @@ class ConfigProviderTest extends TestCase
         $configProvider = new ConfigProvider();
         $this->assertEquals(
             [
+                'laminas-cli' => [
+                    'commands' => [
+                        'order:publish:pending' => PublishPendingCommand::class,
+                    ]
+                ],
                 'dependencies' => [
                     'invokables' => [
                         OrderEntityHydrator::class,
@@ -48,6 +54,7 @@ class ConfigProviderTest extends TestCase
                         RabbitMQConnection::class => RabbitMQConnectionFactory::class,
                         PublishMessageToQueueMiddleware::class => ConfigAbstractFactory::class,
                         MarkOrderAsPublishedMiddleware::class => ConfigAbstractFactory::class,
+                        PublishPendingCommand::class => ConfigAbstractFactory::class,
                     ],
                 ],
                 ConfigAbstractFactory::class => [
@@ -82,6 +89,11 @@ class ConfigProviderTest extends TestCase
                     ],
                     MarkOrderAsPublishedMiddleware::class => [
                         OrderService::class,
+                        LoggerInterface::class,
+                    ],
+                    PublishPendingCommand::class => [
+                        OrderService::class,
+                        OrderCreatedMessageProducer::class,
                         LoggerInterface::class,
                     ]
                 ]

@@ -8,6 +8,7 @@ use DateTime;
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Db\Adapter\Driver\ResultInterface;
 use Laminas\Db\ResultSet\HydratingResultSet;
+use Laminas\Db\Sql\Select;
 use Laminas\Db\TableGateway\TableGateway;
 use Laminas\Hydrator\HydratorInterface;
 use Laminas\Log\LoggerInterface;
@@ -56,19 +57,14 @@ class OrderTable extends TableGateway
     public function getAll(): ?HydratingResultSet
     {
         $select = $this->getSql()->select();
-        $stmt = $this->getSql()->prepareStatementForSqlObject($select);
-        if ($this->logger) {
-            $this->logger->debug($select->getSqlString($this->getAdapter()->getPlatform()));
-        }
-        $result = $stmt->execute();
+        return $this->selectMany($select);
+    }
 
-        if ($result instanceof ResultInterface && $result->isQueryResult() && $result->count() > 0) {
-            $resultSet = new HydratingResultSet($this->hydrator, new OrderEntity());
-
-            return $resultSet->initialize($result);
-        }
-
-        return null;
+    public function getAllUnpublished(): ?HydratingResultSet
+    {
+        $select = $this->getSql()->select();
+        $select->where->isNull('published_at');
+        return $this->selectMany($select);
     }
 
     public function getById(int $orderId): ?OrderEntity
@@ -85,6 +81,27 @@ class OrderTable extends TableGateway
 
         if ($result instanceof ResultInterface && $result->isQueryResult() && $result->count() > 0) {
             return $this->hydrator->hydrate($result->current(), new OrderEntity());
+        }
+
+        return null;
+    }
+
+    /**
+     * @param Select $select
+     * @return HydratingResultSet|null
+     */
+    private function selectMany(Select $select): ?HydratingResultSet
+    {
+        $stmt = $this->getSql()->prepareStatementForSqlObject($select);
+        if ($this->logger) {
+            $this->logger->debug($select->getSqlString($this->getAdapter()->getPlatform()));
+        }
+        $result = $stmt->execute();
+
+        if ($result instanceof ResultInterface && $result->isQueryResult() && $result->count() > 0) {
+            $resultSet = new HydratingResultSet($this->hydrator, new OrderEntity());
+
+            return $resultSet->initialize($result);
         }
 
         return null;

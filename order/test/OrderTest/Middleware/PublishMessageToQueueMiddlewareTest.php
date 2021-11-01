@@ -67,6 +67,9 @@ class PublishMessageToQueueMiddlewareTest extends TestCase
         $requestMock->expects($this->once())->method('getAttribute')
             ->with(SaveOrderToDatabaseMiddleware::CREATED_ORDER)->willReturn($orderEntity);
 
+        $requestMock->expects($this->once())->method('withAttribute')
+            ->with(PublishMessageToQueueMiddleware::class, true)->willReturnSelf();
+
         $requestHandlerMock = $this->createMock(RequestHandlerInterface::class);
         $requestHandlerMock->expects($this->once())->method('handle')->with($requestMock);
 

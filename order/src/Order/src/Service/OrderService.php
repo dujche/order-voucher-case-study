@@ -41,7 +41,23 @@ class OrderService
         $toReturn = [];
         /** @var OrderEntity $item */
         foreach($result as $item) {
-            $toReturn[] = $item->toArray();
+            $toReturn[] = $item;
+        }
+
+        return $toReturn;
+    }
+
+    public function getAllUnpublished(): array
+    {
+        $result = $this->orderTable->getAllUnpublished();
+        if ($result === null) {
+            return [];
+        }
+
+        $toReturn = [];
+        /** @var OrderEntity $item */
+        foreach($result as $item) {
+            $toReturn[] = $item;
         }
 
         return $toReturn;
