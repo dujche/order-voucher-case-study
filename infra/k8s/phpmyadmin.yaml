@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: phpmyadmin-real
+  name: phpmyadmin-real
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: phpmyadmin-real
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        io.kompose.service: phpmyadmin-real
+    spec:
+      containers:
+        - env:
+            - name: PMA_HOSTS
+              value: mysql-real-order,mysql-real-voucher
+            - name: PMA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                    name: mysql-pass-d99g28hb6g
+                    key: password
+            - name: PMA_USER
+              value: root
+          image: phpmyadmin/phpmyadmin
+          name: phpmyadmin-real
+          ports:
+            - containerPort: 80
+          resources: {}
+      restartPolicy: Always
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    io.kompose.service: phpmyadmin-real
+  name: phpmyadmin-real
+spec:
+  type: NodePort
+  ports:
+    - name: "81"
+      port: 81
+      targetPort: 80
+  selector:
+    io.kompose.service: phpmyadmin-real

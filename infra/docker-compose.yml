@@ -4,9 +4,7 @@ services:
 
   php-order-api:
     build:
-      dockerfile: Dockerfile.api
-      context: .
-      target: development
+      context: ./docker
     volumes:
       - ./order:/var/www/html
     depends_on:
@@ -16,9 +14,8 @@ services:
 
   php-voucher-event-listener:
     build:
-      dockerfile: Dockerfile.event-listener
-      context: .
-      target: development
+      context: ./docker
+      dockerfile: Dockerfile.voucher
     volumes:
       - ./voucher:/usr/src/voucher
     depends_on:
@@ -29,9 +26,7 @@ services:
 
   php-voucher-api:
     build:
-      dockerfile: Dockerfile.api
-      context: .
-      target: development
+      context: ./docker
     volumes:
       - ./voucher:/var/www/html
     depends_on:

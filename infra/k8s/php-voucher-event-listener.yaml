@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    io.kompose.service: php-voucher-event-listener
+  name: php-voucher-event-listener
+spec:
+  containers:
+    - image: voucher-event-listener:0.0.1
+      imagePullPolicy: Never
+      name: php-voucher-event-listener
+      resources: {}
+  restartPolicy: OnFailure
+status: {}

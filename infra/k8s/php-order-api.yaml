@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: php-order-api
+  name: php-order-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: php-order-api
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        io.kompose.service: php-order-api
+    spec:
+      containers:
+        - image: order-api-php:0.0.1
+          imagePullPolicy: Never
+          name: php-order-api
+          ports:
+            - containerPort: 80
+          resources: {}
+      restartPolicy: Always
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    io.kompose.service: php-order-api
+  name: php-order-api
+spec:
+  type: NodePort
+  ports:
+    - name: "8000"
+      port: 8000
+      targetPort: 80
+  selector:
+    io.kompose.service: php-order-api
+status:
+  loadBalancer: {}

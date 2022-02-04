@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mysql-real-voucher
+  name: mysql-real-voucher
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mysql-real-voucher
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mysql-real-voucher
+    spec:
+      containers:
+        - env:
+            - name: MYSQL_ROOT_PASSWORD
+              #value: GCECjdRLf7RvwJLJ
+              valueFrom:
+                secretKeyRef:
+                    name: mysql-pass-d99g28hb6g
+                    key: password
+          image: voucher-mysql:0.0.2
+          imagePullPolicy: Never
+          name: mysql-real-voucher
+          resources: {}
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: real-voucher-data
+      restartPolicy: Always
+      volumes:
+        - name: real-voucher-data
+          persistentVolumeClaim:
+            claimName: real-voucher-data
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    io.kompose.service: mysql-real-voucher
+  name: mysql-real-voucher
+spec:
+  ports:
+    - port: 3306
+  selector:
+    io.kompose.service: mysql-real-voucher
+  clusterIP: None
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    io.kompose.service: real-voucher-data
+  name: real-voucher-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+status: {}
+

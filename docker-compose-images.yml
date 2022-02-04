@@ -3,56 +3,37 @@ version: '3.7'
 services:
 
   php-order-api:
-    build:
-      dockerfile: Dockerfile.api
-      context: .
-      target: development
-    volumes:
-      - ./order:/var/www/html
+    image: order-api-php:0.0.1
     depends_on:
       - rabbitmq
     ports:
       - 8000:80
 
   php-voucher-event-listener:
-    build:
-      dockerfile: Dockerfile.event-listener
-      context: .
-      target: development
-    volumes:
-      - ./voucher:/usr/src/voucher
+    image: voucher-event-listener:0.0.1
     depends_on:
       - rabbitmq
     restart: on-failure
-    command: >
-      sh -c "sleep 15 && ./laminas voucher:listen"
 
   php-voucher-api:
-    build:
-      dockerfile: Dockerfile.api
-      context: .
-      target: development
-    volumes:
-      - ./voucher:/var/www/html
+    image: voucher-api-php:0.0.1
     depends_on:
       - rabbitmq
     ports:
       - 8001:80
 
   mysql-real-order:
-    image: mysql:5.6
+    image: order-mysql:0.0.1
     environment:
       MYSQL_ROOT_PASSWORD: GCECjdRLf7RvwJLJ
     volumes:
-      - ./docker/db/order:/docker-entrypoint-initdb.d
       - real-order-data:/var/lib/mysql
 
   mysql-real-voucher:
-    image: mysql:5.6
+    image: voucher-mysql:0.0.1
     environment:
       MYSQL_ROOT_PASSWORD: GCECjdRLf7RvwJLJ
     volumes:
-      - ./docker/db/voucher:/docker-entrypoint-initdb.d
       - real-voucher-data:/var/lib/mysql
 
   phpmyadmin-real:
@@ -68,13 +49,11 @@ services:
       - mysql-real-voucher
 
   rabbitmq:
-    image: "rabbitmq:3-management"
+    image: order-voucher-rabbitmq:0.0.1
     ports:
       - "15672:15672"
     volumes:
       - 'rabbitmq_data:/data'
-      - ./docker/rabbitmq.conf:/etc/rabbitmq/rabbitmq.config
-      - ./docker/rabbitmq_definitions.json:/opt/definitions.json
 
 volumes:
   real-order-data:
