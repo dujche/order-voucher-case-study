@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Voucher\MessageQueue\RabbitMQ;
+namespace Voucher\MessageQueue\Kafka;
 
 use Exception;
 use Laminas\Log\LoggerInterface;
-use PhpAmqpLib\Message\AMQPMessage;
 use Voucher\Interfaces\CreateVoucherStrategyInterface;
 use Voucher\Interfaces\MessageHandlerInterface;
 use Voucher\Interfaces\MessageParserInterface;
@@ -36,11 +35,10 @@ class OrderCreatedMessageHandler implements MessageHandlerInterface
 
     public function handle($message): void
     {
-        $messageValueObject = $this->messageParser->parseMessage($message->getBody());
+        $messageValueObject = $this->messageParser->parseMessage($message->payload);
 
         if (!$this->messageValidator->isValid($messageValueObject)) {
-            $this->logger->err(sprintf("Invalid message received %s", $message->getBody()));
-            $message->getChannel()->basic_nack($message->getDeliveryTag());
+            $this->logger->err(sprintf("Invalid message received %s", $message->payload));
             return;
         }
 
@@ -62,8 +60,6 @@ class OrderCreatedMessageHandler implements MessageHandlerInterface
                     )
                 );
             }
-
-            $message->getChannel()->basic_ack($message->getDeliveryTag());
         } catch (Exception $e) {
             $logMessage = sprintf(
                 'Exception caught processing order %s : %s.',
@@ -72,8 +68,6 @@ class OrderCreatedMessageHandler implements MessageHandlerInterface
             );
 
             $this->logger->err($logMessage);
-
-            $message->getChannel()->basic_nack($message->getDeliveryTag());
         }
         unset($translatedMessage);
         gc_collect_cycles();

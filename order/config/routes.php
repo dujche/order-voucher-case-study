@@ -67,6 +67,7 @@ return static function (Application $app, MiddlewareFactory $factory, ContainerI
             CreateOrderPayloadValidationMiddleware::class,
             SaveOrderToDatabaseMiddleware::class,
             PublishMessageToQueueMiddleware::class,
+
             MarkOrderAsPublishedMiddleware::class,
             PostOrderHandler::class
         ],

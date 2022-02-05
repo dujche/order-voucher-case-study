@@ -64,7 +64,9 @@ class ConfigProvider
             'factories' => [
                 RabbitMQConnection::class => RabbitMQConnectionFactory::class,
                 OrderCreatedListener::class => OrderCreatedListenerFactory::class,
+                \Voucher\MessageQueue\Kafka\OrderCreatedListener::class => \Voucher\MessageQueue\Kafka\Factory\OrderCreatedListenerFactory::class,
                 OrderCreatedMessageHandler::class => ConfigAbstractFactory::class,
+                \Voucher\MessageQueue\Kafka\OrderCreatedMessageHandler::class => ConfigAbstractFactory::class,
                 OrderCreatedMessageParser::class => ConfigAbstractFactory::class,
                 ListenCommand::class => ConfigAbstractFactory::class,
                 VoucherTable::class => ConfigAbstractFactory::class,
@@ -73,6 +75,11 @@ class ConfigProvider
                 CurrencyExchangeRateFetcher::class => ConfigAbstractFactory::class,
                 Client::class => HttpClientFactory::class,
                 GetVoucherHandler::class => ConfigAbstractFactory::class,
+            ],
+            'shared' => [
+                \Voucher\MessageQueue\Kafka\OrderCreatedListener::class => false,
+                ListenCommand::class => false,
+
             ]
         ];
     }
@@ -86,12 +93,18 @@ class ConfigProvider
                 CreateFiveEuroVoucherStrategy::class,
                 OrderCreatedMessageParser::class,
             ],
+            \Voucher\MessageQueue\Kafka\OrderCreatedMessageHandler::class => [
+                LoggerInterface::class,
+                OrderCreatedMessageValidator::class,
+                CreateFiveEuroVoucherStrategy::class,
+                OrderCreatedMessageParser::class,
+            ],
             OrderCreatedMessageParser::class => [
                 LoggerInterface::class,
                 CurrencyExchangeRateFetcher::class,
             ],
             ListenCommand::class => [
-                OrderCreatedListener::class,
+                \Voucher\MessageQueue\Kafka\OrderCreatedListener::class,
             ],
             VoucherTable::class => [
                 'voucher-db',

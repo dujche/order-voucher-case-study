@@ -5,7 +5,9 @@ RUN apt-get update && apt-get install -y \
     libjpeg62-turbo-dev \
     libpng-dev \
     libcurl4-gnutls-dev \
-    libzip-dev zip
+    libzip-dev zip \
+    git \
+    librdkafka-dev 
 
 RUN docker-php-ext-configure pdo_mysql \
     && docker-php-ext-configure sockets \
@@ -14,6 +16,12 @@ RUN docker-php-ext-configure pdo_mysql \
     && docker-php-ext-install -j$(nproc) sockets \
     && docker-php-ext-install -j$(nproc) curl \
     && docker-php-ext-install -j$(nproc) zip
+
+WORKDIR /tmp/
+
+RUN git clone https://github.com/arnaud-lb/php-rdkafka.git && cd php-rdkafka/ && phpize && ./configure && make all -j 5 && make install
+
+RUN echo "extension=rdkafka.so" > /usr/local/etc/php/conf.d/rdkafka.ini && rm -rf /tmp/php-rdkafka/
 
 WORKDIR /usr/src/voucher/vendor/bin
 

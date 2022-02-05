@@ -11,7 +11,7 @@ use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
-class OrderCreatedMessageProducer
+class OrderCreatedMessageProducerRabbitMQ implements OrderCreatedMessageProducerInterface
 {
     public const DELIVERY_MODE = 2;
     public const ORDER_CREATED_CHANNEL_NAME = 'order_created';
@@ -37,15 +37,23 @@ class OrderCreatedMessageProducer
      * @param string $routingKey
      * @throws RuntimeException
      */
-    public function publish(AMQPMessage $message, string $routingKey): void
+    public function publish(string $messageBody): void
     {
         try {
             if ($this->channel === null) {
                 throw new RuntimeException('Rabbit MQ channel is not available');
             }
-            $this->channel->basic_publish($message, '', $routingKey);
+
+            $message = new AMQPMessage(
+                $messageBody,
+                [
+                    'delivery_mode' => static::DELIVERY_MODE,
+                ]
+            );
+
+            $this->channel->basic_publish($message, '', static::ORDER_CREATED_CHANNEL_NAME);
             $this->logger->debug(
-                sprintf('Queued message with key [%s] and content [%s]', $routingKey, var_export($message->body, true))
+                sprintf('Queued message with key [%s] and content [%s]', static::ORDER_CREATED_CHANNEL_NAME, var_export($message->body, true))
             );
         } catch (Exception $e) {
             $logMessage = sprintf(

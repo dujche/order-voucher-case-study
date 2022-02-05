@@ -28,4 +28,24 @@ return [
             'keepalive' => true
         ],
     ],
+    'kafka' => [
+        'brokers' => [
+            [
+                'host' => 'kafka',
+                'port' => '9092',
+            ],
+            [
+                'host' => 'kafka-2',
+                'port' => '9092',
+            ],
+            [
+                'host' => 'kafka-3',
+                'port' => '9092',
+            ]
+        ],
+        'options' => [
+            'logLevel' => LOG_WARNING
+        ],
+
+    ]
 ];

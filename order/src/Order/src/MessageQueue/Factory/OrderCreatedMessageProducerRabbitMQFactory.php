@@ -7,24 +7,24 @@ namespace Order\MessageQueue\Factory;
 use Interop\Container\ContainerInterface;
 use Laminas\Log\LoggerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
-use Order\MessageQueue\OrderCreatedMessageProducer;
+use Order\MessageQueue\OrderCreatedMessageProducerRabbitMQ;
 use Order\MessageQueue\RabbitMQConnection;
 
-class OrderCreatedMessageProducerFactory implements FactoryInterface
+class OrderCreatedMessageProducerRabbitMQFactory implements FactoryInterface
 {
     public function __invoke(
         ContainerInterface $container,
         $requestedName,
         ?array $options = null
-    ): OrderCreatedMessageProducer {
+    ): OrderCreatedMessageProducerRabbitMQ {
         /** @var RabbitMQConnection|null $rabbitMQConnection */
         $rabbitMQConnection = $container->get(RabbitMQConnection::class);
         $connection = $rabbitMQConnection ? $rabbitMQConnection->getConnection() : null;
         $channel = $rabbitMQConnection ?
-            $rabbitMQConnection->buildChannel(OrderCreatedMessageProducer::ORDER_CREATED_CHANNEL_NAME)
+            $rabbitMQConnection->buildChannel(OrderCreatedMessageProducerRabbitMQ::ORDER_CREATED_CHANNEL_NAME)
             : null;
 
-        return new OrderCreatedMessageProducer(
+        return new OrderCreatedMessageProducerRabbitMQ(
             $container->get(LoggerInterface::class),
             $connection,
             $channel

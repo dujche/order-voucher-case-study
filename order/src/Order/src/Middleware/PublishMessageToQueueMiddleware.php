@@ -9,8 +9,7 @@ use JsonException;
 use Laminas\Log\LoggerInterface;
 use Order\Entity\OrderEntity;
 use Order\Exception\RuntimeException;
-use Order\MessageQueue\OrderCreatedMessageProducer;
-use PhpAmqpLib\Message\AMQPMessage;
+use Order\MessageQueue\OrderCreatedMessageProducerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -18,11 +17,11 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class PublishMessageToQueueMiddleware implements MiddlewareInterface
 {
-    private OrderCreatedMessageProducer $producer;
+    private OrderCreatedMessageProducerInterface $producer;
 
     private LoggerInterface $logger;
 
-    public function __construct(OrderCreatedMessageProducer $producer, LoggerInterface $logger)
+    public function __construct(OrderCreatedMessageProducerInterface $producer, LoggerInterface $logger)
     {
         $this->producer = $producer;
         $this->logger = $logger;
@@ -67,14 +66,7 @@ class PublishMessageToQueueMiddleware implements MiddlewareInterface
             JSON_THROW_ON_ERROR
         );
 
-        $message = new AMQPMessage(
-            $messageBody,
-            [
-                'delivery_mode' => OrderCreatedMessageProducer::DELIVERY_MODE,
-            ]
-        );
-
-        $this->producer->publish($message, OrderCreatedMessageProducer::ORDER_CREATED_CHANNEL_NAME);
+        $this->producer->publish($messageBody);
 
         $this->producer->closeConnection();
     }

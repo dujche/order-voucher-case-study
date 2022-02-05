@@ -8,9 +8,8 @@ use Exception;
 use JsonException;
 use Laminas\Log\LoggerInterface;
 use Order\Entity\OrderEntity;
-use Order\MessageQueue\OrderCreatedMessageProducer;
+use Order\MessageQueue\OrderCreatedMessageProducerInterface;
 use Order\Service\OrderService;
-use PhpAmqpLib\Message\AMQPMessage;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -19,13 +18,13 @@ class PublishPendingCommand extends Command
 {
     private OrderService $orderService;
 
-    private OrderCreatedMessageProducer $producer;
+    private OrderCreatedMessageProducerInterface $producer;
 
     private LoggerInterface $logger;
 
     public function __construct(
         OrderService $orderService,
-        OrderCreatedMessageProducer $producer,
+        OrderCreatedMessageProducerInterface $producer,
         LoggerInterface $logger,
         string $name = null
     ) {
@@ -62,14 +61,7 @@ class PublishPendingCommand extends Command
                 JSON_THROW_ON_ERROR
             );
 
-            $message = new AMQPMessage(
-                $messageBody,
-                [
-                    'delivery_mode' => OrderCreatedMessageProducer::DELIVERY_MODE,
-                ]
-            );
-
-            $this->producer->publish($message, OrderCreatedMessageProducer::ORDER_CREATED_CHANNEL_NAME);
+            $this->producer->publish($messageBody);
 
             $this->orderService->setPublished($pendingOrder->getId());
         }

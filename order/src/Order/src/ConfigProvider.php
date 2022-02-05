@@ -12,9 +12,9 @@ use Order\Error\CustomErrorHandlerMiddleware;
 use Order\Filter\CreateOrderPayloadFilter;
 use Order\Handler\GetOrderHandler;
 use Order\Handler\PostOrderHandler;
-use Order\MessageQueue\Factory\OrderCreatedMessageProducerFactory;
+use Order\MessageQueue\Factory\OrderCreatedMessageProducerKafkaFactory;
 use Order\MessageQueue\Factory\RabbitMQConnectionFactory;
-use Order\MessageQueue\OrderCreatedMessageProducer;
+use Order\MessageQueue\OrderCreatedMessageProducerInterface;
 use Order\MessageQueue\RabbitMQConnection;
 use Order\Middleware\CreateOrderPayloadValidationMiddleware;
 use Order\Middleware\MarkOrderAsPublishedMiddleware;
@@ -72,7 +72,7 @@ class ConfigProvider
                 SaveOrderToDatabaseMiddleware::class => ConfigAbstractFactory::class,
                 CreateOrderPayloadValidationMiddleware::class => ConfigAbstractFactory::class,
                 CustomErrorHandlerMiddleware::class => ConfigAbstractFactory::class,
-                OrderCreatedMessageProducer::class => OrderCreatedMessageProducerFactory::class,
+                OrderCreatedMessageProducerInterface::class => OrderCreatedMessageProducerKafkaFactory::class,
                 RabbitMQConnection::class => RabbitMQConnectionFactory::class,
                 PublishMessageToQueueMiddleware::class => ConfigAbstractFactory::class,
                 MarkOrderAsPublishedMiddleware::class => ConfigAbstractFactory::class,
@@ -110,7 +110,7 @@ class ConfigProvider
                 LoggerInterface::class
             ],
             PublishMessageToQueueMiddleware::class => [
-                OrderCreatedMessageProducer::class,
+                OrderCreatedMessageProducerInterface::class,
                 LoggerInterface::class,
             ],
             MarkOrderAsPublishedMiddleware::class => [
@@ -119,7 +119,7 @@ class ConfigProvider
             ],
             PublishPendingCommand::class => [
                 OrderService::class,
-                OrderCreatedMessageProducer::class,
+                OrderCreatedMessageProducerInterface::class,
                 LoggerInterface::class,
             ]
         ];
